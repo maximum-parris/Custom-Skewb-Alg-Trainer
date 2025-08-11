@@ -397,7 +397,7 @@ function calcState(state, subPuzzles, showPostAdj) {
          //added
             if(numSolutions < 20){
                     if (!solution.includes("z")) {
-                      console.log("woohoooooooooooo");
+                     // console.log("woohoooooooooooo");
                       numSolutions++;
                       //console.log(state + " " + subPuzzles + " " + showPostAdj);
                       scrambleList.push(solution);

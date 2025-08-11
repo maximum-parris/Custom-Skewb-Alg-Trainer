@@ -2,6 +2,7 @@ let workerOutput;
 var scramblesMap = {};
 
 function processAlgSet(csvArr) {
+    console.log("IT'S WORKINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
     let invArr = [];
     csvArr.forEach(Case => {
         invArr.push(flipAlg(Case.a));
