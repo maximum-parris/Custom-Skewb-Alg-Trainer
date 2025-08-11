@@ -31,6 +31,35 @@ function resize(event) {
 }
 
 function main() {
+    //fie input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.id = 'csvUploader';
+    fileInput.accept = '.csv';
+    fileInput.style.margin = '20px';
+    fileInput.style.display = 'block';
+    document.body.insertBefore(fileInput, document.body.firstChild);
+    console.log("creating file input");
+
+    //get file
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+                // Pass data to your processing function'
+                console.log(results.data);
+                processAlgSet(results.data);
+            },
+         error: (err) => {
+            console.error('CSV parse error:', err);
+         }
+        });
+    });
+
     loadSettings();
     applySettings();
     timer = document.getElementById('timer');
