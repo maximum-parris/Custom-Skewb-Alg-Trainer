@@ -8,6 +8,7 @@ function processAlgSet(csvArr) {
     });
     console.log(invArr);
     getScrambles(invArr);
+    getColourArr(invArr);
 }
 
 function flipAlg(alg){
@@ -145,5 +146,289 @@ function createScramblesMap (input) {
     FPNscr.push(scr);
   })
   scramblesMap[numScrambleMapEntries] = FPNscr;
-  console.log(scramblesMap);
+  //console.log(scramblesMap);
+}
+
+function getColourArr (invArr) {
+  invArr.forEach (invAlg =>{
+    console.log(invAlg);
+    colourArr = [
+    { u1: g, u2: g, u3: g, u4: g, u5: g },
+    { l1: w, l2: w, l3: w, l4: w, l5: w },
+    { f1: o, f2: o, f3: o, f4: o, f5: o },
+    { r1: y, r2: y, r3: y, r4: y, r5: y },
+    { b1: r, b2: r, b3: r, b4: r, b5: r },
+    { d1: b, d2: b, d3: b, d4: b, d5: b }
+  ];
+  invAlg = invAlg.replace(/[’‘]/g, "'");
+  let algByMove = alg.split(" ");
+ // console.log(algByMove);
+  algByMove.forEach((move) => {
+    let multiplier = getMultiplier(move);
+    doMove(move, multiplier);
+  });
+  })
+}
+
+function getMultiplier(move) {
+  let multiplier;
+  if (isMove.test(move)) {
+    // console.log(move);
+    // console.log(typeof move);
+    // console.log("in yay");
+    if (move.substring(1, 2) == "'") {
+      // console.log("yay");
+      multiplier = 2;
+    } else {
+      multiplier = 1;
+    }
+  } else {
+    if (move.substring(1, 2) == "'") {
+      multiplier = 3;
+    } else if (move.substring(1, 2) == "2") {
+      multiplier = 2;
+    } else {
+      multiplier = 1;
+    }
+  }
+  return multiplier;
+}
+
+function doMove(move, multiplier) {
+  let turn = move.charAt(0);
+  let temp;
+  for (i = 0; i < multiplier; i++) {
+    if (turn == "r") {
+      temp = colourArr[2].f5;
+      colourArr[2].f5 = colourArr[5].d4;
+      colourArr[5].d4 = colourArr[3].r2;
+      colourArr[3].r2 = temp;
+
+      temp = colourArr[5].d2;
+      colourArr[5].d2 = colourArr[3].r4;
+      colourArr[3].r4 = colourArr[2].f3;
+      colourArr[2].f3 = temp;
+
+      temp = colourArr[1].l4;
+      colourArr[1].l4 = colourArr[4].b5;
+      colourArr[4].b5 = colourArr[0].u4;
+      colourArr[0].u4 = temp;
+
+      temp = colourArr[2].f1;
+      colourArr[2].f1 = colourArr[5].d1;
+      colourArr[5].d1 = colourArr[3].r1;
+      colourArr[3].r1 = temp;
+
+      temp = colourArr[2].f4;
+      colourArr[2].f4 = colourArr[5].d3;
+      colourArr[5].d3 = colourArr[3].r5;
+      colourArr[3].r5 = temp;
+      
+    } else if (turn == "R") {
+      temp = colourArr[2].f2;
+      colourArr[2].f2 = colourArr[3].r5;
+      colourArr[3].r5 = colourArr[0].u3;
+      colourArr[0].u3 = temp;
+
+      temp = colourArr[0].u5;
+      colourArr[0].u5 = colourArr[2].f4;
+      colourArr[2].f4 = colourArr[3].r3;
+      colourArr[3].r3 = temp;
+
+      temp = colourArr[1].l3;
+      colourArr[1].l3 = colourArr[5].d3;
+      colourArr[5].d3 = colourArr[4].b2;
+      colourArr[4].b2 = temp;
+
+      temp = colourArr[0].u1;
+      colourArr[0].u1 = colourArr[2].f1;
+      colourArr[2].f1 = colourArr[3].r1;
+      colourArr[3].r1 = temp;
+
+      temp = colourArr[2].f3;
+      colourArr[2].f3 = colourArr[3].r2;
+      colourArr[3].r2 = colourArr[0].u4;
+      colourArr[0].u4 = temp;
+    } else if (turn == "b") {
+      temp = colourArr[0].u3;
+      colourArr[0].u3 = colourArr[2].f4;
+      colourArr[2].f4 = colourArr[1].l5;
+      colourArr[1].l5 = temp;
+
+      temp = colourArr[3].r3;
+      colourArr[3].r3 = colourArr[5].d3;
+      colourArr[5].d3 = colourArr[4].b4;
+      colourArr[4].b4 = temp;
+
+      temp = colourArr[4].b2;
+      colourArr[4].b2 = colourArr[3].r5;
+      colourArr[3].r5 = colourArr[5].d5;
+      colourArr[5].d5 = temp;
+
+      temp = colourArr[4].b1;
+      colourArr[4].b1 = colourArr[3].r1;
+      colourArr[3].r1 = colourArr[5].d1;
+      colourArr[5].d1 = temp;
+
+      temp = colourArr[3].r4;
+      colourArr[3].r4 = colourArr[5].d4;
+      colourArr[5].d4 = colourArr[4].b5;
+      colourArr[4].b5 = temp;
+    } else if (turn == "B") {
+      temp = colourArr[0].u4;
+      colourArr[0].u4 = colourArr[3].r4;
+      colourArr[3].r4 = colourArr[4].b3;
+      colourArr[4].b3 = temp;
+
+      temp = colourArr[3].r2;
+      colourArr[3].r2 = colourArr[4].b5;
+      colourArr[4].b5 = colourArr[0].u2;
+      colourArr[0].u2 = temp;
+
+      temp = colourArr[2].f3;
+      colourArr[2].f3 = colourArr[5].d4;
+      colourArr[5].d4 = colourArr[1].l2;
+      colourArr[1].l2 = temp;
+
+      temp = colourArr[0].u1;
+      colourArr[0].u1 = colourArr[3].r1;
+      colourArr[3].r1 = colourArr[4].b1;
+      colourArr[4].b1 = temp;
+
+      temp = colourArr[0].u3;
+      colourArr[0].u3 = colourArr[3].r3;
+      colourArr[3].r3 = colourArr[4].b2;
+      colourArr[4].b2 = temp;
+    } else if (turn == "z") {
+      temp = colourArr[0].u1;
+      colourArr[0].u1 = colourArr[4].b1;
+      colourArr[4].b1 = colourArr[5].d1;
+      colourArr[5].d1 = colourArr[2].f1;
+      colourArr[2].f1 = temp;
+
+      temp = colourArr[0].u2;
+      colourArr[0].u2 = colourArr[4].b4;
+      colourArr[4].b4 = colourArr[5].d2;
+      colourArr[5].d2 = colourArr[2].f2;
+      colourArr[2].f2 = temp;
+
+      temp = colourArr[0].u5;
+      colourArr[0].u5 = colourArr[4].b3;
+      colourArr[4].b3 = colourArr[5].d5;
+      colourArr[5].d5 = colourArr[2].f5;
+      colourArr[2].f5 = temp;
+
+      temp = colourArr[1].l2;
+      colourArr[1].l2 = colourArr[1].l5;
+      colourArr[1].l5 = colourArr[1].l4;
+      colourArr[1].l4 = colourArr[1].l3;
+      colourArr[1].l3 = temp;
+
+      temp = colourArr[0].u3;
+      colourArr[0].u3 = colourArr[4].b5;
+      colourArr[4].b5 = colourArr[5].d3;
+      colourArr[5].d3 = colourArr[2].f3;
+      colourArr[2].f3 = temp;
+
+      temp = colourArr[0].u4;
+      colourArr[0].u4 = colourArr[4].b2;
+      colourArr[4].b2 = colourArr[5].d4;
+      colourArr[5].d4 = colourArr[2].f4;
+      colourArr[2].f4 = temp;
+
+      temp = colourArr[3].r2;
+      colourArr[3].r2 = colourArr[3].r3;
+      colourArr[3].r3 = colourArr[3].r4;
+      colourArr[3].r4 = colourArr[3].r5;
+      colourArr[3].r5 = temp;
+    } else if (turn == "y") {
+      temp = colourArr[3].r1;
+      colourArr[3].r1 = colourArr[4].b1;
+      colourArr[4].b1 = colourArr[1].l1;
+      colourArr[1].l1 = colourArr[2].f1;
+      colourArr[2].f1 = temp;
+
+      temp = colourArr[3].r2;
+      colourArr[3].r2 = colourArr[4].b2;
+      colourArr[4].b2 = colourArr[1].l2;
+      colourArr[1].l2 = colourArr[2].f2;
+      colourArr[2].f2 = temp;
+
+      temp = colourArr[3].r3;
+      colourArr[3].r3 = colourArr[4].b3;
+      colourArr[4].b3 = colourArr[1].l3;
+      colourArr[1].l3 = colourArr[2].f3;
+      colourArr[2].f3 = temp;
+
+      temp = colourArr[3].r4;
+      colourArr[3].r4 = colourArr[4].b4;
+      colourArr[4].b4 = colourArr[1].l4;
+      colourArr[1].l4 = colourArr[2].f4;
+      colourArr[2].f4 = temp;
+
+      temp = colourArr[3].r5;
+      colourArr[3].r5 = colourArr[4].b5;
+      colourArr[4].b5 = colourArr[1].l5;
+      colourArr[1].l5 = colourArr[2].f5;
+      colourArr[2].f5 = temp;
+
+      // Rotate U face clockwise
+      temp = colourArr[0].u3;
+      colourArr[0].u3 = colourArr[0].u2;
+      colourArr[0].u2 = colourArr[0].u5;
+      colourArr[0].u5 = colourArr[0].u4;
+      colourArr[0].u4 = temp;
+
+      // Rotate D face counterclockwise
+      temp = colourArr[5].d2;
+      colourArr[5].d2 = colourArr[5].d3;
+      colourArr[5].d3 = colourArr[5].d4;
+      colourArr[5].d4 = colourArr[5].d5;
+      colourArr[5].d5 = temp;
+    } else if (turn == "x") {
+      temp = colourArr[2].f2;
+      colourArr[2].f2 = colourArr[2].f5;
+      colourArr[2].f5 = colourArr[2].f4;
+      colourArr[2].f4 = colourArr[2].f3;
+      colourArr[2].f3 = temp;
+
+      temp = colourArr[4].b2;
+      colourArr[4].b2 = colourArr[4].b3;
+      colourArr[4].b3 = colourArr[4].b4;
+      colourArr[4].b4 = colourArr[4].b5;
+      colourArr[4].b5 = temp;
+
+      temp = colourArr[0].u1;
+      colourArr[0].u1 = colourArr[1].l1;
+      colourArr[1].l1 = colourArr[5].d1;
+      colourArr[5].d1 = colourArr[3].r1;
+      colourArr[3].r1 = temp;
+
+      temp = colourArr[0].u2;
+      colourArr[0].u2 = colourArr[1].l5;
+      colourArr[1].l5 = colourArr[5].d4;
+      colourArr[5].d4 = colourArr[3].r3;
+      colourArr[3].r3 = temp;
+
+      temp = colourArr[0].u3;
+      colourArr[0].u3 = colourArr[1].l2;
+      colourArr[1].l2 = colourArr[5].d5;
+      colourArr[5].d5 = colourArr[3].r4;
+      colourArr[3].r4 = temp;
+
+      temp = colourArr[0].u4;
+      colourArr[0].u4 = colourArr[1].l3;
+      colourArr[1].l3 = colourArr[5].d2;
+      colourArr[5].d2 = colourArr[3].r5;
+      colourArr[3].r5 = temp;
+
+      temp = colourArr[0].u5;
+      colourArr[0].u5 = colourArr[1].l4;
+      colourArr[1].l4 = colourArr[5].d3;
+      colourArr[5].d3 = colourArr[3].r2;
+      colourArr[3].r2 = temp;
+    }
+  }
+  console.log(colourArr);
+  return colourArr;
 }

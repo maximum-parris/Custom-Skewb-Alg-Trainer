@@ -401,7 +401,7 @@ function calcState(state, subPuzzles, showPostAdj) {
                       numSolutions++;
                       //console.log(state + " " + subPuzzles + " " + showPostAdj);
                       scrambleList.push(solution);
-                      console.log(scrambleList);
+                     // console.log(scrambleList);
                      if (numSolutions === 20) {
                         console.log("finally 20 " + scrambleList);
                         postMessage({value: scrambleList, type: "scrambles"});
