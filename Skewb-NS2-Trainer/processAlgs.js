@@ -509,4 +509,5 @@ function generateSVG (colourArr, k) {
   blobUrls[k + 1] = url;
   console.log(blobUrls);
   renderSelection();
+  outputAlgs();
 }
