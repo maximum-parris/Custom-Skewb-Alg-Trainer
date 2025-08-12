@@ -1,15 +1,68 @@
 let workerOutput;
 var scramblesMap = {};
+let g = "#59A14F";
+let w = "#fafafa";
+let o = "#F28E2B";
+let y = "#ffcf3d";
+let r = "#fa2e2e";
+let b = "#4264fa";
+const isMove = /^[rRbB]/; //else it's a rotation.
+var baseSvgCode = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100.0 60.05675960631075\"><style>polygon { stroke: black; stroke-width: 0.5px; stroke-linejoin: round;}</style>"
+var skewbStickers = [
+  ["u1", "u2", "u3", "u4", "u5"],
+  ["l1", "l2", "l3", "l4", "l5"],
+  ["f1", "f2", "f3", "f4", "f5"],
+  ["r1", "r2", "r3", "r4", "r5"],
+  ["b1", "b2", "b3", "b4", "b5"]
+//  ["d1", "d2", "d3", "d4", "d5"] 6 face currently not supported
+  ];
+let faces = ["u", "l", "f", "r", "b"]; //same here
+const stickerPoints = {
+  // U face
+  u1: '38.75 21.87 61.25 21.87 61.25 10.62 38.75 10.62',
+  u2: '38.75 10.62 27.50 16.25 38.75 21.87',
+  u3: '61.25 10.62 50.00 5.00 38.75 10.62',
+  u4: '61.25 21.87 72.50 16.25 61.25 10.62',
+  u5: '38.75 21.87 50.00 27.50 61.25 21.87',
+  
+  // L face
+  l1: '38.75 21.87 50.00 41.28 38.75 49.43 27.50 30.03',
+  l2: '27.50 16.25 38.75 21.87 27.50 30.03',
+  l3: '38.75 21.87 50.00 27.50 50.00 41.28',
+  l4: '50.00 41.28 38.75 49.43 50.00 55.06',
+  l5: '27.50 30.03 27.50 43.81 38.75 49.43',
+  
+  // F face
+  f1: '61.25 21.87 72.50 30.03 61.25 49.43 50.00 41.28',
+  f2: '50.00 27.50 61.25 21.87 50.00 41.28',
+  f3: '61.25 21.87 72.50 16.25 72.50 30.03',
+  f4: '72.50 30.03 61.25 49.43 72.50 43.81',
+  f5: '50.00 41.28 50.00 55.06 61.25 49.43',
+  
+  // R face
+  r1: '83.75 10.62 95.00 18.78 83.75 38.18 72.50 30.03',
+  r2: '72.50 16.25 83.75 10.62 72.50 30.03',
+  r3: '83.75 10.62 95.00 5.00 95.00 18.78',
+  r4: '95.00 18.78 83.75 38.18 95.00 32.56',
+  r5: '72.50 30.03 83.75 38.18 72.50 43.81',
+  
+  // B face
+  b1: '16.25 10.62 27.50 30.03 16.25 38.18 5.00 18.78',
+  b2: '5.00 5.00 16.25 10.62 5.00 18.78',
+  b3: '16.25 10.62 27.50 16.25 27.50 30.03',
+  b4: '27.50 30.03 16.25 38.18 27.50 43.81',
+  b5: '5.00 18.78 5.00 32.56 16.25 38.18'
+};
+
 
 function processAlgSet(csvArr) {
-    console.log("IT'S WORKINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
-    let invArr = [];
-    csvArr.forEach(Case => {
-        invArr.push(flipAlg(Case.a));
-    });
-    console.log(invArr);
-    getScrambles(invArr);
-    getColourArr(invArr);
+  let invArr = [];
+  csvArr.forEach(Case => {
+    invArr.push(flipAlg(Case.a));
+  });
+  console.log(invArr);
+  getScrambles(invArr);
+  getColourArr(invArr); //gens colourArr + svgs + urls
 }
 
 function flipAlg(alg){
@@ -58,6 +111,7 @@ function getScrambles (invArr){
   work = new Worker("worker.js");
   let solvestring = "[";
   for (i=0; i<invArr.length; i++) {
+    invArr[i].replace(/\b(x2|x'|x|y2|y'|y)\b/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
     if (i != invArr.length - 1) {
     solvestring += invArr[i] + ", ";
     } else {
@@ -139,7 +193,7 @@ function getScrambles (invArr){
 //input -> ["scr1", "scr2"...]
 let numScrambleMapEntries = 0;
 function createScramblesMap (input) {
-  console.log(numScrambleMapEntries);
+  //console.log(numScrambleMapEntries);
   let FPNscr = [];
   numScrambleMapEntries++;
   input.forEach(scr => {
@@ -150,8 +204,10 @@ function createScramblesMap (input) {
   //console.log(scramblesMap);
 }
 
-function getColourArr (invArr) {
-  invArr.forEach (invAlg =>{
+function getColourArr (invArr, k) {
+  let finColourArr; //so doMove doesn't run a billion times;
+  for (k = 0; k < invArr.length; k++) {
+    let invAlg = invArr[k];
     console.log(invAlg);
     colourArr = [
     { u1: g, u2: g, u3: g, u4: g, u5: g },
@@ -160,15 +216,17 @@ function getColourArr (invArr) {
     { r1: y, r2: y, r3: y, r4: y, r5: y },
     { b1: r, b2: r, b3: r, b4: r, b5: r },
     { d1: b, d2: b, d3: b, d4: b, d5: b }
-  ];
-  invAlg = invAlg.replace(/[’‘]/g, "'");
-  let algByMove = alg.split(" ");
- // console.log(algByMove);
-  algByMove.forEach((move) => {
-    let multiplier = getMultiplier(move);
-    doMove(move, multiplier);
-  });
-  })
+    ];
+    invAlg = invAlg.replace(/[’‘]/g, "'");
+    let algByMove = invAlg.split(" ");
+    // console.log(algByMove);
+    algByMove.forEach((move) => {
+      let multiplier = getMultiplier(move);
+      finColourArr = doMove(move, multiplier);
+    });
+    generateSVG(finColourArr, k); //k is the Nth case
+  }
+  
 }
 
 function getMultiplier(move) {
@@ -432,4 +490,22 @@ function doMove(move, multiplier) {
   }
   console.log(colourArr);
   return colourArr;
+}
+
+function generateSVG (colourArr, k) {  
+  let svg = baseSvgCode;
+  for (let j = 0; j < faces.length; j++) { //for the face "r"
+    for (let i = 1; i <= 5; i++) { //for the specific sticked "1"
+      let face = faces[j];
+      let sticker = face + i;
+      let svgPosition = stickerPoints[sticker];
+      let color = colourArr[j][sticker];
+      svg += `<polygon id="${sticker}" fill="${color}" points="${svgPosition}"/>\n`;
+    }
+  }
+  svg += "</svg>";
+  blob = new Blob([svg], {type: 'image/svg+xml'});
+  url = URL.createObjectURL(blob);
+  blobUrls[k + 1] = url;
+  console.log(blobUrls);
 }

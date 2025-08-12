@@ -174,7 +174,9 @@ fetch('combined.json')
             const svg = entry[1];
             const blob = new Blob([svg], {type: 'image/svg+xml'});
             const url = URL.createObjectURL(blob);
-            blobUrls[k] = url;
+           // blobUrls[k] = url;
+           //commented out for testing
+           // console.log(blobUrls);
         }
         )
     }).then((_) => {
