@@ -116,7 +116,10 @@ function getScrambles (invArr){
   work = new Worker("worker.js");
   let solvestring = "[";
   for (i=0; i<invArr.length; i++) {
+    console.log(invArr[i]);
+    console.log("after replacement");
     invArr[i].replace(/\b(x2|x'|x|y2|y'|y)\b/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
+    console.log(invArr[i]);
     if (i != invArr.length - 1) {
     solvestring += invArr[i] + ", ";
     } else {
