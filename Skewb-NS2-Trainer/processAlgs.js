@@ -157,6 +157,7 @@ function getScrambles (invArr){
   work.onmessage = function(event) {
                // console.log("got event " + event.data.type);
                 if (event.data.type === "stop") {
+                  console.log("algs done");
                   work.terminate();
                   return;
                 } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.
