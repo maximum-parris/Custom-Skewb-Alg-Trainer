@@ -302,11 +302,11 @@ function getSubPuzzle(pieceList, fullPuzzle, ignore, subgroup, prune, adjust) {
 
 function checkMoveGroup(puzzle, movegroup, errorStr) {
     let moves = splitSubgroupStr(movegroup);
-   /* for (let move of moves) {
+    for (let move of moves) {
         if (!puzzle.moveStr.includes(move)) {
             postMessage({value: '"' + move + '" is not a valid move in ' + errorStr, type: "stop"});
         }
-    } */
+    }
 }
 
 function parseModifiers(input) {

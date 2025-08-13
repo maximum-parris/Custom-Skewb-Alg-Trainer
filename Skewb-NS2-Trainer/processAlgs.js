@@ -146,7 +146,7 @@ function getScrambles (invArr){
                   ignore: "",
                   solve: solvestring, //scram area 
                   preAdjust: "z",
-                  postAdjust: "z x y",
+                  postAdjust: "z",
                   subgroups: subgroupData,
                   sorting: sortData,
                   esq: "",
