@@ -1,3 +1,4 @@
+var algsInformation = {};
 let workerOutput;
 var scramblesMap = {};
 let g = "#59A14F";
@@ -56,10 +57,16 @@ const stickerPoints = {
 
 
 function processAlgSet(csvArr) {
+  console.log("this is csvArr");
+  console.log(csvArr);
   let invArr = [];
-  csvArr.forEach(Case => {
-    invArr.push(flipAlg(Case.a));
-  });
+  for(i=0; i<csvArr.length; i++){
+    let Case = csvArr[i]
+    algsInformation[i + 1] = {"a": [Case.a], "name": Case.name};
+    console.log("this is algsinfo");
+    console.log(algsInformation);
+    invArr.push(flipAlg(Case.a)); //gets inverse of algs
+  };
   console.log(invArr);
   getScrambles(invArr);
   getColourArr(invArr); //gens colourArr + svgs + urls
@@ -105,8 +112,6 @@ function flipAlg(alg){
 
 
 function getScrambles (invArr){
-  let numCases = 0;
-  let numSolutions = 0;
   let scrambleList = [];
   work = new Worker("worker.js");
   let solvestring = "[";
@@ -149,7 +154,6 @@ function getScrambles (invArr){
   work.onmessage = function(event) {
                // console.log("got event " + event.data.type);
                 if (event.data.type === "stop") {
-                  console.log(scrambleList);
                   work.terminate();
                   return;
                 } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.
@@ -187,6 +191,10 @@ function getScrambles (invArr){
                     debugVars.push(event.data.value);
                 }
             }
+  /*algsInformation[i] = {"a": scrambleList};
+  console.log("alg info scr")
+  console.log(algsInformation);
+  console.log(scrambleList); */
   return scrambleList;
 }
 
@@ -508,6 +516,6 @@ function generateSVG (colourArr, k) {
   url = URL.createObjectURL(blob);
   blobUrls[k + 1] = url;
   console.log(blobUrls);
-  renderSelection();
-  outputAlgs();
+  console.log(algsInformation);
+  outputAlgs(k + 1);
 }

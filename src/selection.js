@@ -191,9 +191,9 @@ function makeDivNormal(groupname) {
         allSelected &= sel;
         s += "<div id='itemTd" + i + "' " + dblclick  + " onclick='itemClicked(" + i + ")' class='" + (sel ? "itemSel" : "itemUnsel") + " borderedContainer' title='" + algsInfo[i]["name"] + "'>" +
             `<img oncontextmenu='return false;' class='caseImage' id='sel${i}' src='${blobUrls[i]}' ></div>`;
-        console.log(blobUrls);
+       /* console.log(blobUrls);
         console.log("this is s");
-        console.log(s);
+        console.log(s); */
     }
     s = "<div class='colFlex' style='width: fit-content'> <div class='borderedContainer " + (allSelected ? "itemSel" : "itemUnsel") + " pad groupNameDiv'" + s;
     s += "</div></div>";
@@ -328,7 +328,7 @@ function renderSelection() {
         }
     }
 
-    document.getElementById("cases_selection").innerHTML = s;
+   // document.getElementById("cases_selection").innerHTML = s;
     ensureSelectionMatchesShown();
     updateTitle();
     renderPresets();

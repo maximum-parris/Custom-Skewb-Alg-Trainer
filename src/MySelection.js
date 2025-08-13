@@ -1,23 +1,27 @@
-function outputAlgs () {
+function outputAlgs (k) {
     var s = "";
-    var indeces = algsGroups[groupname];
+   // var indeces = algsGroups[groupname];
 
-    s += " onclick='selectCaseGroup(\"" + groupname
-        + "\")'><b>" + groupname + "</b></div>";
-    s += "<div class='rowFlex' style='flex-wrap: wrap'>";
-    var allSelected = true;
-    for (var j = 0; j < indeces.length; j++) {
-        var i = indeces[j]; // case number
-        var sel = (selCases.indexOf(i) != -1);
-        var dblclick = isMobile() ? ` ontouchstart='touchstart(event, () => {console.log("test"); showHint(null, ${i})})' ontouchend='touchend(${i})' ` : "ondblclick='showHint(this, " + i + ")'";
+   /* s += " onclick='selectCaseGroup(\"" + "place holder"
+        + "\")'><b>" + "place holder" + "</b></div>";
+    s += "<div class='rowFlex' style='flex-wrap: wrap'>"; */  //this is the head of the group it's in
+    var allSelected = false;
+  //  for (var j = 0; j < indeces.length; j++) {
+       // var i = indeces[j]; // case number
+       // k is now i 
+        var sel = (selCases.indexOf(k) != -1);
+        var dblclick = isMobile() ? ` ontouchstart='touchstart(event, () => {console.log("test"); showHint(null, ${k})})' ontouchend='touchend(${k})' ` : "ondblclick='showHint(this, " + k + ")'";
         allSelected &= sel;
-        s += "<div id='itemTd" + i + "' " + dblclick  + " onclick='itemClicked(" + i + ")' class='" + (sel ? "itemSel" : "itemUnsel") + " borderedContainer' title='" + algsInfo[i]["name"] + "'>" +
-            `<img oncontextmenu='return false;' class='caseImage' id='sel${i}' src='${blobUrls[i]}' ></div>`;
+        s += "<div id='itemTd" + k + "' " + dblclick  + " onclick='itemClicked(" + k + ")' class='" + (sel ? "itemSel" : "itemUnsel") + " borderedContainer' title='" + algsInfo[k]["name"] + "'>" +
+            `<img oncontextmenu='return false;' class='caseImage' id='sel${k}' src='${blobUrls[k]}' ></div>`;
         console.log(blobUrls);
         console.log("this is s");
         console.log(s);
-    }
+   // }
     s = "<div class='colFlex' style='width: fit-content'> <div class='borderedContainer " + (allSelected ? "itemSel" : "itemUnsel") + " pad groupNameDiv'" + s;
     s += "</div></div>";
+    console.log("from outputAlgs");
+    console.log(s);
+    document.getElementById("cases_selection").innerHTML += s;
     return s;
 }
