@@ -300,7 +300,7 @@ function renderHint(i) {
     document.getElementById('editAlgButton').innerText = "edit"
     document.getElementById("boxTitle").innerHTML = `${algsInfo[i]['algset']} ${algsInfo[i]['group']} ${algsInfo[i]['name']}`;
     var longestAlgLength = 0;
-    var currentAlgs = algsInfo[i]["a"]
+    var currentAlgs = algsInformation[i]["a"]
     if (i in customAlgs) {
         currentAlgs = customAlgs[i]["a"]
     }
