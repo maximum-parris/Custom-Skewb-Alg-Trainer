@@ -25,3 +25,14 @@ function outputAlgs (k) {
     document.getElementById("cases_selection").innerHTML += s;
     return s;
 }
+
+function initSelection (){
+    const createGroup = document.createElement('input');
+    createGroup.type = 'text';
+    createGroup.id = 'createGroup';
+
+    const addCasesToGroup = document.createElement('button');
+    addCasesToGroup.innerText = "add cases to group";
+    addCasesToGroup.id = 'actg';
+
+}

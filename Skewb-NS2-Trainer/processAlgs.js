@@ -61,6 +61,7 @@ const stickerPoints = {
 
 function processAlgSet(csvArr) {
   initProgressBar();
+  initSelection();
 
   console.log("this is csvArr");
   console.log(csvArr);
