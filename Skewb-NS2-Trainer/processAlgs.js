@@ -140,18 +140,18 @@ function getScrambles (invArr){
   let scrambleList = [];
   work = new Worker("worker.js");
   let solvestring = "[";
-  for (i=0; i<invArr.length; i++) {
+  for (let i=0; i<invArr.length; i++) {
     console.log(invArr[i]);
     console.log("after replacement");
-    invArr[i].replace(/\b(x2|x'|x|y2|y'|y)\b/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
+    invArr[i] = invArr[i].replace(/(^|\s)(x2|x'|x|y2|y'|y)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
     console.log(invArr[i]);
-    invArr[i] += " " + startTracingProcess(invArr[i]);
-    console.log("after adding rotation");
-    console.log(invArr[i]);
+    scrStr = invArr[i] + " " + startTracingProcess(invArr[i]);
+    console.log("scrStr: ");
+    console.log(scrStr);
     if (i != invArr.length - 1) {
-    solvestring += invArr[i] + ", ";
+    solvestring += scrStr + ", ";
     } else {
-      solvestring += invArr[i];
+      solvestring += scrStr;
     }
   }
   solvestring += "]";

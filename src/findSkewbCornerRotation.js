@@ -2,7 +2,6 @@
 let outputDiv = document.getElementById("output"); */
 var pos; //the position in speffz scheme
 var ori; //how many cw twists neede to orient the corner
-const isMove = /^[rRbB]/;
 
 let rotationsObject = {
     "0": ["y'", "y2", "y", "", "x2 y", "x2", "x2 y'", "z2"],
@@ -24,13 +23,14 @@ function startTracingProcess(input) {
     let inputStr = input.trim();
     let algByMove = inputStr.split(" ");
     algByMove.forEach((move) => {
-        let multiplier = getMultiplier(move);
-        doMove(move, multiplier);
+        let multiplier = getMultiplierFSCR(move);
+        doMoveFSCR(move, multiplier);
     });
-    return output(pos, ori);
+    let res = outputFSCR(pos, ori);
+    return res;
 }
 
-function getMultiplier(move) {
+function getMultiplierFSCR(move) {
     let multiplier;
     if (isMove.test(move)) {
         if (move.substring(1, 2) == "'") {
@@ -50,7 +50,7 @@ function getMultiplier(move) {
     return multiplier;
 }
 
-function doMove(move, multiplier) {
+function doMoveFSCR(move, multiplier) {
     let turn = move.charAt(0);
     for (i = 0; i < multiplier; i++) {
         if (turn == "r") {
@@ -136,7 +136,7 @@ function doMove(move, multiplier) {
     return (pos, ori);
 }
 
-function output(pos, ori) {
+function outputFSCR(pos, ori) {
     ori = ori % 3; //mod 3
    // outputDiv.innerText = rotationsObject[ori][pos - 1];
     return rotationsObject[ori][pos - 1];
