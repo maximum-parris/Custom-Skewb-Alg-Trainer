@@ -284,3 +284,20 @@ input:checked+.slider:before {
   ::-webkit-scrollbar-thumb:hover {
     background: var(--primaryTextHover);
   } 
+
+.input-box {
+    display: flex;
+    align-items: center;    
+    gap: 10px;              
+    margin: 20px;
+}
+
+#csvUploader {
+    padding: 3px 15px;
+    border: 2px solid #FFFFFF;
+    border-radius: 20px;
+}
+
+#progress {
+    font-weight: bold;
+}

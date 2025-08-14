@@ -7,6 +7,9 @@ let o = "#F28E2B";
 let y = "#ffcf3d";
 let r = "#fa2e2e";
 let b = "#4264fa";
+var progressBar;
+//var fileInput = document.getElementById("csvUploader");
+var scrGenned = 0;
 const isMove = /^[rRbB]/; //else it's a rotation.
 var baseSvgCode = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100.0 60.05675960631075\"><style>polygon { stroke: black; stroke-width: 0.5px; stroke-linejoin: round;}</style>"
 var skewbStickers = [
@@ -57,8 +60,12 @@ const stickerPoints = {
 
 
 function processAlgSet(csvArr) {
+  initProgressBar();
+
   console.log("this is csvArr");
   console.log(csvArr);
+  numCases = csvArr.length;
+  console.log("numCases: " + numCases);
   let invArr = [];
   for(i=0; i<csvArr.length; i++){
     let Case = csvArr[i]
@@ -70,6 +77,24 @@ function processAlgSet(csvArr) {
   console.log(invArr);
   getScrambles(invArr);
   getColourArr(invArr); //gens colourArr + svgs + urls
+}
+
+function updateProgressBar(scrGenned){
+  progressBar.innerText = "Progress: " + scrGenned + "/" + numCases;
+} 
+
+function initProgressBar () {
+  var fileInput = document.getElementById("csvUploader");
+  const container = document.createElement('div');
+  container.className = 'input-box';
+  progressBar = document.createElement("div");
+  progressBar.innerText = "Progress: ";
+  progressBar.id = 'progress';
+  progressBar.style.margin = '20px';
+  progressBar.style.display = 'block';
+  container.appendChild(fileInput);
+  container.appendChild(progressBar);
+  document.body.insertBefore(container, document.body.firstChild);
 }
 
 function flipAlg(alg){
@@ -120,6 +145,9 @@ function getScrambles (invArr){
     console.log("after replacement");
     invArr[i].replace(/\b(x2|x'|x|y2|y'|y)\b/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
     console.log(invArr[i]);
+    invArr[i] += " " + startTracingProcess(invArr[i]);
+    console.log("after adding rotation");
+    console.log(invArr[i]);
     if (i != invArr.length - 1) {
     solvestring += invArr[i] + ", ";
     } else {
@@ -129,7 +157,7 @@ function getScrambles (invArr){
   solvestring += "]";
   console.log("getting scrambles " + solvestring);
 
-  let subgroupData = [{subgroup: 'r l b B z', prune: '6', search: '5'}];
+  let subgroupData = [{subgroup: 'r l b B', prune: '6', search: '5'}];
   let sortData = [{type: 'priority', pieces: ''}];
   /*console.log({puzzle: "l: (UFL-1 DFR-1 DBL-1) (DLF+1) (L F D)\nL: (URF-1 DLF-1 ULB-1) (UFL+1) (U F L)\nr: (DFR-1 UBR-1 DBL-1) (DRB+1) (R B D)\nR: (URF-1 ULB-1 DRB-1) (UBR+1) (R U B)\nb: (ULB-1 DLF-1 DRB-1) (DBL+1) (L D B)\nB: (UBR-1 UFL-1 DBL-1) (ULB+1) (U L B)\nF: (UFL-1 UBR-1 DFR-1) (URF+1) (F U R) \nf: (URF-1 DRB-1 DLF-1) (DFR+1) (F R D)\nS: (URF-1) (UFL+1) (ULB+1) (UBR-1) (R U) (F B)\nH: (URF+1) (UFL-1) (ULB-1) (UBR+1) (R U) (F B)\ns: (UBR-1) (ULB+1) (DRB-1) (DBL+1) (U D) (R B)\nh: (UBR+1) (ULB-1) (DRB+1) (DBL-1) (U D) (R B)      \nx: (F U B D) (URF+1 UBR-1 DRB+1 DFR-1) (UFL-1 ULB+1 DBL-1 DLF+1)\ny: (F L B R) (URF UFL ULB UBR) (DFR DLF DBL DRB)\nz: (U R D L) (URF-1 DFR+1 DLF-1 UFL+1) (UBR+1 DRB-1 DBL+1 ULB-1)\nvUperm: (U B D)\nhUperm: (U R D)", 
                   ignore: "",
@@ -145,23 +173,26 @@ function getScrambles (invArr){
   work.postMessage({puzzle: "l: (UFL-1 DFR-1 DBL-1) (DLF+1) (L F D)\nL: (URF-1 DLF-1 ULB-1) (UFL+1) (U F L)\nr: (DFR-1 UBR-1 DBL-1) (DRB+1) (R B D)\nR: (URF-1 ULB-1 DRB-1) (UBR+1) (R U B)\nb: (ULB-1 DLF-1 DRB-1) (DBL+1) (L D B)\nB: (UBR-1 UFL-1 DBL-1) (ULB+1) (U L B)\nF: (UFL-1 UBR-1 DFR-1) (URF+1) (F U R) \nf: (URF-1 DRB-1 DLF-1) (DFR+1) (F R D)\nS: (URF-1) (UFL+1) (ULB+1) (UBR-1) (R U) (F B)\nH: (URF+1) (UFL-1) (ULB-1) (UBR+1) (R U) (F B)\ns: (UBR-1) (ULB+1) (DRB-1) (DBL+1) (U D) (R B)\nh: (UBR+1) (ULB-1) (DRB+1) (DBL-1) (U D) (R B)      \nx: (F U B D) (URF+1 UBR-1 DRB+1 DFR-1) (UFL-1 ULB+1 DBL-1 DLF+1)\ny: (F L B R) (URF UFL ULB UBR) (DFR DLF DBL DRB)\nz: (U R D L) (URF-1 DFR+1 DLF-1 UFL+1) (UBR+1 DRB-1 DBL+1 ULB-1)\nvUperm: (U B D)\nhUperm: (U R D)", 
                   ignore: "",
                   solve: solvestring, //scram area 
-                  preAdjust: "z",
-                  postAdjust: "z",
+                  preAdjust: "",
+                  postAdjust: "", //no pre/post-adjust because of the fcn rotation grabber function
                   subgroups: subgroupData,
                   sorting: sortData,
                   esq: "",
-                  rankesq: "z_:30",
+                  rankesq: "",
                   showPost: false});
 
 
   work.onmessage = function(event) {
                // console.log("got event " + event.data.type);
                 if (event.data.type === "stop") {
+                  progressBar.innerText += " Done!"
                   console.log("algs done");
                   work.terminate();
                   return;
                 } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.
                   workerOutput = event.data.value;
+                  scrGenned++;
+                  updateProgressBar(scrGenned);
                   console.log("worker output: ");
                   console.log(workerOutput);
                   createScramblesMap(workerOutput);
@@ -188,7 +219,7 @@ function getScrambles (invArr){
                     numSolutions = 0;
                     caseNum = event.data.value.num; */
                 } else if (event.data.type === "num-states") {
-                    numCases = event.data.value;
+                  //  numCases = event.data.value;
                 } else if (event.data.type === "moveWeights") {
                     moveWeights = event.data.value;
                 } else if (event.data.type === "debug") {

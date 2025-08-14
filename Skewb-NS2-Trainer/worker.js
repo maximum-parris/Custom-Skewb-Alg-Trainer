@@ -25,9 +25,7 @@ function main(input) {
         console.log("batchStates " + batchStates);
         let state = fullPuzzle.execute(fullPuzzle.solved, fullPuzzle.moveStrToList(stateStr));
         if (!(arraysEqual(fullPuzzle.solved, state))) {
-            console.log("in final if statement!!!");
             if (caseNum >= startNum || modifiers.has(caseNum)) {
-                console.log("getting the 20 scrambles NICEEE");
                 numSolutions = 0;
                 postMessage({ value: { index: solutionIndex, setup: stateStr, num: caseNum }, type: "next-state" });
                 calcState(state, subPuzzles, input.showPost);

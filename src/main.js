@@ -39,7 +39,6 @@ function main() {
     fileInput.style.margin = '20px';
     fileInput.style.display = 'block';
     document.body.insertBefore(fileInput, document.body.firstChild);
-    console.log("creating file input");
 
     //get file
     fileInput.addEventListener('change', (event) => {
