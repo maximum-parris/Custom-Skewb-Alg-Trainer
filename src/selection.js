@@ -338,7 +338,7 @@ function renderSelection() {
         }
     }
 
-   // document.getElementById("cases_selection").innerHTML = s;
+   //document.getElementById("cases_selection").innerHTML = s;
     ensureSelectionMatchesShown();
     updateTitle();
     renderPresets();

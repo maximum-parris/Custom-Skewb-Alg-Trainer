@@ -189,6 +189,7 @@ function getScrambles (invArr){
                   progressBar.innerText += " Done!"
                   console.log("algs done");
                   initSelection();
+                  renderSelection();
                   work.terminate();
                   return;
                 } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.

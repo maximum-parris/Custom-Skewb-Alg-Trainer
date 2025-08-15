@@ -60,7 +60,6 @@ function initSelection() {
         console.warn("#cases_selection not found, appending to container instead.");
         container.appendChild(addGroupContainer);
     }
-
     return;
 }
 

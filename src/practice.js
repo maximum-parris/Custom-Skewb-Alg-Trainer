@@ -38,6 +38,7 @@ function showMode(m)
         // select
         recapArray = [];
         renderSelection();
+        //testing
     }
     resize('');
 }
