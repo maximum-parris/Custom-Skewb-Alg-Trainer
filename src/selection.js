@@ -15,23 +15,28 @@ function getAlgsetIds(algset) {
     return algsetIds;
 }
 
+//HERE IS ANOTHER TIMING ISSUE
 function getAllValidGroups() {
-    var valid = [];
-    for (const [algset, groups] of Object.entries(algsets)) {
-        if (selectedAlgSets[algset]) {
-            valid = valid.concat(groups);
+    if (algsets){ //to only run after creating algsets
+        var valid = [];
+        for (const [algset, groups] of Object.entries(algsets)) {
+            if (selectedAlgSets[algset]) {
+                valid = valid.concat(groups);
+            }
         }
+        return valid;
     }
-    return valid;
 }
-
+//THIS ONE TOO
 function getAllValid() {
-    var valid = [];
-    var validGroups = getAllValidGroups();
-    for (const group of validGroups) {
-        valid = valid.concat(algsGroups[group]);
+    if (algsGroups){
+        var valid = [];
+        var validGroups = getAllValidGroups();
+        for (const group of validGroups) {
+            valid = valid.concat(algsGroups[group]);
+        }
+        return valid;
     }
-    return valid;
 }
 
 function countAlgsetSelected(algset) {
@@ -53,14 +58,16 @@ function isAlgsetAllSelected(algset) {
     return allSelected;
 }
 
-
+/*
+    THIS PART IS BEING MODIFIED
+*/
 function updateTitle() {
     var algs = getAllValid().length;
     var allSelector = document.getElementById('allSelector');
     if (selCases.length == algs) {
         allSelector.className = 'borderedContainer itemSel pad';
     } else {
-        allSelector.className = 'borderedContainer itemUnsel pad';
+      allSelector.className = 'borderedContainer itemUnsel pad';
     }
     for (const [algset, isShown] of Object.entries(selectedAlgSets)) {
         if (isShown && Object.keys(selectedAlgSets).length > 1) {
@@ -104,6 +111,8 @@ function itemClicked(i) {
     saveSelection();
     updateTitle();
 }
+
+//end of issues
 
 function selectAllNone() {
     var validAlgs = getAllValid();
