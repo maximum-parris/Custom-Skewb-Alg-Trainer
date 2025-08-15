@@ -46,7 +46,8 @@ function initSelection (){
     addCasesToGroup.id = 'actg';
     addCasesToGroup.onclick = createGroup;
     addGroupContainer.appendChild(addCasesToGroup);
-    container.insertBefore(addGroupContainer, document.getElementById("cases_selection"));
+    container.appendChild(addGroupContainer);
+   // container.insertBefore(addGroupContainer, document.getElementById("cases_selection"));
     return;
 }
 
