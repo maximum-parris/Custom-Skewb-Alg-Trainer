@@ -26,14 +26,15 @@ function outputAlgs (k) {
     return s;
 }
 
-function initSelection (){
+function initSelection() {
     console.log("GENNING BUTTONS");
 
     const container = document.querySelector(".borderedContainer");
     if (!container) {
-    console.error("No container found for .borderedContainer");
-    return;
-}
+        console.error("No container found for .borderedContainer");
+        return;
+    }
+
     const addGroupContainer = document.createElement('div');
 
     const createGroupName = document.createElement('input');
@@ -44,12 +45,21 @@ function initSelection (){
     const addCasesToGroup = document.createElement('button');
     addCasesToGroup.innerText = "add cases to group";
     addCasesToGroup.id = 'actg';
-    addCasesToGroup.onclick = createGroup;
+    addCasesToGroup.onclick = createGroup; // no parentheses
     addGroupContainer.appendChild(addCasesToGroup);
-    container.appendChild(addGroupContainer);
-   // container.insertBefore(addGroupContainer, document.getElementById("cases_selection"));
+
+    // Insert above #cases_selection
+    const casesSelection = document.getElementById("cases_selection");
+    if (casesSelection && casesSelection.parentNode) {
+        casesSelection.parentNode.insertBefore(addGroupContainer, casesSelection);
+    } else {
+        console.warn("#cases_selection not found, appending to container instead.");
+        container.appendChild(addGroupContainer);
+    }
+
     return;
 }
+
 
 function createGroup(){
     console.log("creating groups");
