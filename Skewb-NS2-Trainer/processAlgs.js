@@ -60,7 +60,7 @@ const stickerPoints = {
 
 
 function processAlgSet(csvArr) {
-  initProgressBar();
+//  initProgressBar();
   initSelection();
 
   console.log("this is csvArr");
@@ -188,6 +188,7 @@ function getScrambles (invArr){
                 if (event.data.type === "stop") {
                   progressBar.innerText += " Done!"
                   console.log("algs done");
+                  initSelection();
                   work.terminate();
                   return;
                 } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.
