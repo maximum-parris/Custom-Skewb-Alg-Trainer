@@ -27,6 +27,7 @@ function outputAlgs (k) {
 }
 
 function initSelection (){
+    console.log("GENNING BUTTONS");
     const container = document.querySelector(".borderedContainer");
     const addGroupContatiner = document.createElement('div');
 
