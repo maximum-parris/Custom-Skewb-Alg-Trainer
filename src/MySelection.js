@@ -28,12 +28,12 @@ function outputAlgs (k) {
 
 function initSelection (){
     console.log("GENNING BUTTONS");
+
+    const container = document.querySelector(".borderedContainer");
     if (!container) {
     console.error("No container found for .borderedContainer");
     return;
 }
-
-    const container = document.querySelector(".borderedContainer");
     const addGroupContainer = document.createElement('div');
 
     const createGroupName = document.createElement('input');
