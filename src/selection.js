@@ -86,7 +86,8 @@ function itemClicked(i) {
     var element = document.getElementById("itemTd" + i);
     element.className = (wasSelected ? "itemUnsel" : "itemSel") + " borderedContainer";
     var groupElement = element.parentElement.previousElementSibling;
-    var groupWasSelected = groupElement.classList[1] == 'itemSel';
+    //var groupWasSelected = groupElement.classList[1] == 'itemSel';
+    var groupWasSelected = groupElement.classList.contains('itemSel'); //probabaly safer
     if (groupWasSelected && wasSelected) {
         groupElement.className = 'borderedContainer itemUnsel pad groupNameDiv';
     }

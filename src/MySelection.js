@@ -36,16 +36,20 @@ function initSelection() {
     }
 
     const addGroupContainer = document.createElement('div');
+    addGroupContainer.id = "addGroupContainer"
+    addGroupContainer.classList = "settingsEntry";
 
     const createGroupName = document.createElement('input');
     createGroupName.type = 'text';
     createGroupName.id = 'createGroupName';
     addGroupContainer.appendChild(createGroupName);
+    createGroupName.placeholder = "Group Name";
 
     const addCasesToGroup = document.createElement('button');
-    addCasesToGroup.innerText = "add cases to group";
+    addCasesToGroup.classList = "abutton";
+    addCasesToGroup.innerText = "Sel";
     addCasesToGroup.id = 'actg';
-    addCasesToGroup.onclick = createGroup; // no parentheses
+    addCasesToGroup.onclick = createGroup;
     addGroupContainer.appendChild(addCasesToGroup);
 
     // Insert above #cases_selection
@@ -63,5 +67,5 @@ function initSelection() {
 
 function createGroup(){
     console.log("creating groups");
-    return 1;
+    return;
 }

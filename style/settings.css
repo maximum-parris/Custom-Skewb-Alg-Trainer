@@ -20,13 +20,14 @@ input[type=text]:focus {
 
 
 .settingsEntry {
-    display: flex;
+        display: flex;
     flex-direction: row;
     justify-content: space-between;
     gap: 1em;
     background-color: var(--background);
     border-radius: var(--borderRadius);
     padding: 0.3em;
+
 }
 
 dialog#settings button {

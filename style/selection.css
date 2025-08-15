@@ -19,6 +19,10 @@ div.itemUnsel {
 div#cases_selection {
     width: fit-content;
     padding-bottom: 5em;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    flex-wrap: wrap;
 }
 
 img.caseImage {
@@ -65,4 +69,51 @@ div#presetsSettings input[type=text]:focus {
     border-color: var(--secondary);
     border-width: var(--borderWidth);
     outline: none;
+}
+
+button#actg {
+    height: 100%;
+    font-size: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+    margin: 0;
+    border-width: var(--borderWidth);
+    box-sizing: border-box;
+    line-height: normal;
+}
+
+div#addGroupContainer {
+    background-color: var(--background);
+    justify-content: center; 
+    align-items: center;     
+    gap: 0.5em;               
+    padding: 0.2 0.5em;
+
+    border-width: var(--borderWidth);
+    border-style: solid;
+    border-radius: var(--borderRadius);
+    background-color: var(--backgroundDarker);
+    border-color: transparent;
+}
+
+#addGroupContainer input,
+#addGroupContainer button {
+    width: auto;
+}
+
+input#createGroupName {
+    border-radius: 0.3em;
+    height: fit-content;
+
+    cursor: pointer;
+    border-color: var(--background);
+    width: 12em;
+    margin: 0;
+    padding: 0;
+    font-size: 1em;
+    text-align: left;
+    background-color: var(--background);
+    color: var(--text);
 }
