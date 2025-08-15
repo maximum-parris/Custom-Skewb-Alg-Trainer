@@ -42,9 +42,10 @@ function initSelection (){
     addCasesToGroup.onclick = createGroup();
     addGroupContatiner.appendChild(addCasesToGroup);
     container.insertBefore(addGroupContatiner, document.getElementById("cases_selection"));
-
+    return;
 }
 
 function createGroup(){
     console.log("creating groups");
+    return 1;
 }
