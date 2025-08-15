@@ -28,20 +28,25 @@ function outputAlgs (k) {
 
 function initSelection (){
     console.log("GENNING BUTTONS");
+    if (!container) {
+    console.error("No container found for .borderedContainer");
+    return;
+}
+
     const container = document.querySelector(".borderedContainer");
-    const addGroupContatiner = document.createElement('div');
+    const addGroupContainer = document.createElement('div');
 
     const createGroupName = document.createElement('input');
     createGroupName.type = 'text';
     createGroupName.id = 'createGroupName';
-    addGroupContatiner.appendChild(createGroupName);
+    addGroupContainer.appendChild(createGroupName);
 
     const addCasesToGroup = document.createElement('button');
     addCasesToGroup.innerText = "add cases to group";
     addCasesToGroup.id = 'actg';
-    addCasesToGroup.onclick = createGroup();
-    addGroupContatiner.appendChild(addCasesToGroup);
-    container.insertBefore(addGroupContatiner, document.getElementById("cases_selection"));
+    addCasesToGroup.onclick = createGroup;
+    addGroupContainer.appendChild(addCasesToGroup);
+    container.insertBefore(addGroupContainer, document.getElementById("cases_selection"));
     return;
 }
 
