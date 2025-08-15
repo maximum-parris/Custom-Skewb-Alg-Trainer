@@ -27,6 +27,7 @@ function outputAlgs (k) {
 }
 
 function initSelection (){
+    const container = document.querySelector(".borderedContainer");
     const addGroupContatiner = document.createElement('div');
 
     const createGroupName = document.createElement('input');
@@ -39,6 +40,7 @@ function initSelection (){
     addCasesToGroup.id = 'actg';
     addCasesToGroup.onclick = createGroup();
     addGroupContatiner.appendChild(addCasesToGroup);
+    container.insertBefore(addGroupContatiner, document.getElementById("cases_selection"));
 
 }
 
