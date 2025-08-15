@@ -27,12 +27,21 @@ function outputAlgs (k) {
 }
 
 function initSelection (){
-    const createGroup = document.createElement('input');
-    createGroup.type = 'text';
-    createGroup.id = 'createGroup';
+    const addGroupContatiner = document.createElement('div');
+
+    const createGroupName = document.createElement('input');
+    createGroupName.type = 'text';
+    createGroupName.id = 'createGroupName';
+    addGroupContatiner.appendChild(createGroupName);
 
     const addCasesToGroup = document.createElement('button');
     addCasesToGroup.innerText = "add cases to group";
     addCasesToGroup.id = 'actg';
+    addCasesToGroup.onclick = createGroup();
+    addGroupContatiner.appendChild(addCasesToGroup);
 
+}
+
+function createGroup(){
+    console.log("creating groups");
 }
