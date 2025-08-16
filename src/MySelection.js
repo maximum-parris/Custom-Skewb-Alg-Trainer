@@ -1,4 +1,4 @@
-function outputAlgs (k) {
+function outputAlgs(k) {
     var s = "";
    // var indeces = algsGroups[groupname];
 
@@ -36,7 +36,7 @@ function initSelection() {
     }
 
     const addGroupContainer = document.createElement('div');
-    addGroupContainer.id = "addGroupContainer"
+    addGroupContainer.id = "addGroupContainer";
     addGroupContainer.classList = "settingsEntry";
 
     const createGroupName = document.createElement('input');
@@ -51,11 +51,30 @@ function initSelection() {
     addCasesToGroup.id = 'actg';
     addCasesToGroup.onclick = createGroup;
     addGroupContainer.appendChild(addCasesToGroup);
+//groups^        
+//SETS
+    const addSetContainer = document.createElement('div');
+    addSetContainer.id = "addSetContainer";
+    addSetContainer.classList = "settingsEntry";
+
+    const createSetName = document.createElement('input');
+    createSetName.type = 'text';
+    createSetName.id = 'createSetName';
+    addSetContainer.appendChild(createSetName);
+    createSetName.placeholder = "Set Name";
+
+    const addGroupsToSet = document.createElement('button');
+    addGroupsToSet.classList = "abutton";
+    addGroupsToSet.innerText = "Sel";
+    addGroupsToSet.id = 'agts';
+    addGroupsToSet.onclick = createSet;
+    addSetContainer.appendChild(addGroupsToSet);
 
     // Insert above #cases_selection
     const casesSelection = document.getElementById("cases_selection");
     if (casesSelection && casesSelection.parentNode) {
         casesSelection.parentNode.insertBefore(addGroupContainer, casesSelection);
+        casesSelection.parentNode.insertBefore(addSetContainer, casesSelection);
     } else {
         console.warn("#cases_selection not found, appending to container instead.");
         container.appendChild(addGroupContainer);
@@ -66,5 +85,51 @@ function initSelection() {
 
 function createGroup(){
     console.log("creating groups");
+    let customGroupName = document.getElementById("createGroupName").value;
+    if (!customGroupName) {return};
+    console.log(algsInformation);
+
+    let selCasesArr = []; //these are the cases that are selected
+
+    const groupContainer = document.createElement("div"); //contains group bar and cases;
+    groupContainer.className = "groupContainer";
+    groupContainer.id = "groupContainer" + customGroupName;
+   // document.getElementById("cases_selection").appendChild(groupContainer);
+    document.getElementById("cases_selection").appendChild(groupContainer);
+
+    let groupBar = document.createElement('div'); //creates group bar
+    groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
+    groupBar.onclick = () => selectCaseGroup(customGroupName);
+
+    groupBar.id = "groupBar" + customGroupName;
+    groupBar.innerText = customGroupName;
+    groupContainer.appendChild(groupBar);
+
+    let casesContainer = document.createElement('div');
+    casesContainer.id = "casesContainer";
+    casesContainer.classList = "rowFlex";
+    groupContainer.appendChild(casesContainer);
+    
+    for (i = 1; i <= Object.keys(algsInformation).length; i++){
+        console.log("getting case: " + i);
+        console.log(customGroupName);
+        let caseToCheck = document.getElementById("itemTd" + i);
+        if (caseToCheck.classList.contains("itemSel")){ //gets cases
+            caseToCheck.className = 'borderedContainer itemUnsel pad';
+
+            console.log("case: " + i + " is selected");
+
+            let caseElement = document.getElementById("itemTd" + i); //the case itself
+            casesContainer.appendChild(caseElement); //add case
+
+            selCasesArr.push(i);
+            algsGroups[customGroupName] = selCasesArr;
+        }
+    }
+
     return;
+}
+
+function createSet(){
+
 }

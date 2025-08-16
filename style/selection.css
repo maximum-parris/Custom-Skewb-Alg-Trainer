@@ -71,6 +71,7 @@ div#presetsSettings input[type=text]:focus {
     outline: none;
 }
 
+button#agts,
 button#actg {
     height: 100%;
     font-size: 1em;
@@ -84,6 +85,7 @@ button#actg {
     line-height: normal;
 }
 
+div#addSetContainer,
 div#addGroupContainer {
     background-color: var(--background);
     justify-content: center; 
@@ -103,6 +105,7 @@ div#addGroupContainer {
     width: auto;
 }
 
+input#createSetName,
 input#createGroupName {
     border-radius: 0.3em;
     height: fit-content;
@@ -116,4 +119,14 @@ input#createGroupName {
     text-align: left;
     background-color: var(--background);
     color: var(--text);
+}
+
+.groupContainer {
+    display: block;
+    width: 100%;
+    margin: 0.5em;
+}
+
+.groupBar {
+    margin-bottom: 0.3em;
 }
