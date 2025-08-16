@@ -115,7 +115,9 @@ function createGroup(){
         console.log(customGroupName);
         let caseToCheck = document.getElementById("itemTd" + i);
         if (caseToCheck.classList.contains("itemSel")){ //gets cases
-            caseToCheck.className = 'borderedContainer itemUnsel pad';
+            caseToCheck.className = 'borderedContainer itemUnsel pad'; //unselect after adding to group
+            var index = selCases.indexOf(i);
+            selCases.splice(index, 1);
 
             console.log("case: " + i + " is selected");
 
@@ -123,7 +125,11 @@ function createGroup(){
             casesContainer.appendChild(caseElement); //add case
 
             selCasesArr.push(i);
-            algsGroups[customGroupName] = selCasesArr;
+            algsGroups[customGroupName] = selCasesArr; //enter into algsGroups
+            algsInformation[i].group = customGroupName; //enter into algsinfo
+            console.log(algsInformation);
+
+            //itemClicked(i); //to make sure it's not buggy
         }
     }
 
