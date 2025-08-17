@@ -129,6 +129,9 @@ input#createGroupName {
 
 .groupBar {
     margin-bottom: 0.3em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .setContainer {
@@ -137,4 +140,9 @@ input#createGroupName {
 
 .setBar {
     background-color: black;
+}
+
+.deleteButton {
+    color: var(--primaryText);
+    font-size: 1.2em; 
 }

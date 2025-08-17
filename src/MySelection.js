@@ -99,18 +99,20 @@ function createGroup(){
     document.getElementById("cases_selection").appendChild(groupContainer);
 
     let groupBar = document.createElement('div'); //creates group bar
-    let deleteGroup = document.createElement('span');
-    deleteGroup.className = "material-symbols-outlined inlineButton"
-    deleteGroup.innerHTML = "delete";
-    deleteGroup.onclick = () => deleteGroup(customGroupName);
-    console.log(deleteGroup);
+    let deleteGroupIcon = document.createElement('span');
+    deleteGroupIcon.className = "material-symbols-outlined deleteButton"
+    deleteGroupIcon.innerHTML = "delete";
+    deleteGroupIcon.onclick = (e) => {
+        e.stopPropagation(); // prevent triggering groupBar onclick
+        deleteGroup(customGroupName);
+    };
     groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
     groupBar.onclick = () => selectCaseGroup(customGroupName);
 
     groupBar.id = "groupBar" + customGroupName;
     groupBar.innerText = customGroupName;
     groupContainer.appendChild(groupBar);
-    groupBar.appendChild(deleteGroup);
+    groupBar.appendChild(deleteGroupIcon);
 
     let casesContainer = document.createElement('div');
     casesContainer.id = "casesContainer";
@@ -204,6 +206,33 @@ function createSet(){
     return;
 }
 
-function deleteGroup (){ //as the name suggests it removes the group bar and cases
+function deleteGroup(groupName){ //as the name suggests it removes the group bar and cases
+    if(confirm("Are you sure you want to remove group?")){
+        let groupContainerToDelete = document.getElementById("groupContainer" + groupName);
 
+        for (let caseNumber of algsGroups[groupName]) { //put cases back into unsorted area
+            let caseElement = document.getElementById("itemTd" + caseNumber);
+            console.log(caseElement.className);
+            caseElement.className = "itemUnsel borderedContainer";
+            console.log(caseElement.className);
+            let wrapper = document.createElement("div");
+            wrapper.className = "colFlex"; 
+            wrapper.style.width = "fit-content";
+            wrapper.appendChild(caseElement); //put it back cuz I'm dumb
+
+            console.log("in for loop");
+            let firstElement = document.getElementById("cases_selection").firstChild;
+            console.log("this is wrapper");
+            console.log(wrapper);
+            document.getElementById("cases_selection").insertBefore(wrapper, firstElement);
+
+            for (j = 1; j <= algsGroups[groupName].length; j++){
+                    let CaseNumberFor = algsGroups[groupName][j];
+                    var index = selCases.indexOf(CaseNumberFor);
+                    selCases.splice(index, 1);
+                } //removes cases after selecting
+        }
+
+        groupContainerToDelete.remove();
+    }
 }
