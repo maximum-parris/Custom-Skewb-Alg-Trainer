@@ -1,4 +1,4 @@
-var selCases = [1, 2];
+var selCases = [];
 var selectionPresets = {
     "Default": {
         "selCases": [],
@@ -85,14 +85,24 @@ function itemClicked(i) {
     }
 
     var index = selCases.indexOf(i);
+    console.log("this is selCases");
+    console.log(selCases);
     var wasSelected = (index != -1);
     if (wasSelected)
         selCases.splice(index, 1);
     else
         selCases.push(i);
     var element = document.getElementById("itemTd" + i);
+    console.log("this is element");
+    console.log(element);
+    console.log("before className edit");
+    console.log(element.classList);
     element.className = (wasSelected ? "itemUnsel" : "itemSel") + " borderedContainer";
-    var groupElement = element.parentElement.previousElementSibling;
+    console.log("after classList");
+    console.log(element.classList);
+    //var groupElement = element.parentElement.previousElementSibling;
+    /* console.log("this is groupElement");
+    console.log(groupElement);
     //var groupWasSelected = groupElement.classList[1] == 'itemSel';
     var groupWasSelected = groupElement.classList.contains('itemSel'); //probabaly safer
     if (groupWasSelected && wasSelected) {
@@ -102,14 +112,33 @@ function itemClicked(i) {
         var groupElements = element.parentElement.childNodes;
         var selectedCount = 0;
         for (var i = 0; i < groupElements.length; i++) {
-            selectedCount += groupElements[i].classList[0] == 'itemSel';
+            selectedCount += groupElements[i].classList.contains('itemSel');
+        }
+        if (selectedCount == groupElements.length) {
+            groupElement.className = 'borderedContainer itemSel pad groupNameDiv';
+        }
+    } */
+
+    var groupElement = document.getElementById("groupBar" + algsInformation[i]["group"]);
+    console.log("this is groupElement");
+    console.log(groupElement);
+    //var groupWasSelected = groupElement.classList[1] == 'itemSel';
+    var groupWasSelected = groupElement.classList.contains('itemSel'); //probabaly safer
+    if (groupWasSelected && wasSelected) {
+        groupElement.className = 'borderedContainer itemUnsel pad groupNameDiv';
+    }
+    if (!groupWasSelected && !wasSelected) {
+        var groupElements = element.parentElement.childNodes;
+        var selectedCount = 0;
+        for (var i = 0; i < groupElements.length; i++) {
+            selectedCount += groupElements[i].classList.contains('itemSel');
         }
         if (selectedCount == groupElements.length) {
             groupElement.className = 'borderedContainer itemSel pad groupNameDiv';
         }
     }
     saveSelection();
-    updateTitle();
+   // updateTitle();
 }
 
 //end of issues
@@ -164,7 +193,7 @@ function selectCaseGroup(name) {
         groupNameDiv.className = 'borderedContainer itemSel pad groupNameDiv'
     }
     saveSelection();
-    updateTitle();
+    //updateTitle();
 }
 
 var touchholdtimer;
@@ -199,7 +228,7 @@ function makeDivNormal(groupname) {
         var sel = (selCases.indexOf(i) != -1);
         var dblclick = isMobile() ? ` ontouchstart='touchstart(event, () => {console.log("test"); showHint(null, ${i})})' ontouchend='touchend(${i})' ` : "ondblclick='showHint(this, " + i + ")'";
         allSelected &= sel;
-        s += "<div id='itemTd" + i + "' " + dblclick  + " onclick='itemClicked(" + i + ")' class='" + (sel ? "itemSel" : "itemUnsel") + " borderedContainer' title='" + algsInfo[i]["name"] + "'>" +
+        s += "<div id='itemTd" + i + "' " + dblclick  + " onclick='itemClicked(" + i + ")' class='" + (sel ? "itemSel" : "itemUnsel") + " borderedContainer' title='" + algsInformation[i]["name"] + "'>" +
             `<img oncontextmenu='return false;' class='caseImage' id='sel${i}' src='${blobUrls[i]}' ></div>`;
        /* console.log(blobUrls);
         console.log("this is s");
@@ -338,9 +367,9 @@ function renderSelection() {
         }
     }
 
-   //document.getElementById("cases_selection").innerHTML = s;
+    document.getElementById("cases_selection").innerHTML = s;
     ensureSelectionMatchesShown();
-    updateTitle();
+    //updateTitle();
     renderPresets();
 }
 

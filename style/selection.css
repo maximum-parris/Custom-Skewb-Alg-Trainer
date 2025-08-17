@@ -130,3 +130,11 @@ input#createGroupName {
 .groupBar {
     margin-bottom: 0.3em;
 }
+
+.setContainer {
+    width: 100%;
+}
+
+.setBar {
+    background-color: black;
+}

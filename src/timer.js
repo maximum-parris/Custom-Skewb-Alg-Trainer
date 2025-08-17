@@ -28,13 +28,13 @@ function randomElement(arr) {
 }
 
 function confirmUnsel(i) {
-    if (confirm("Do you want to unselect case " + algsInfo[i]['name']  + "?")) {
+    if (confirm("Do you want to unselect case " + algsInformation[i]['name']  + "?")) {
         var index = selCases.indexOf(i);
         if (index != -1)
             selCases.splice(index, 1);
         else
             document.getElementById("last_scramble").firstChild.innerHTML = "Case already removed!";
-        document.getElementById("last_scramble").firstChild.innerHTML = "Removed case " + algsInfo[i]['name'] + "!";
+        document.getElementById("last_scramble").firstChild.innerHTML = "Removed case " + algsInformation[i]['name'] + "!";
     }
 }
 
@@ -53,7 +53,7 @@ function displayPracticeInfo() {
 function generateScramble() {
     if (window.lastScramble != "")
         document.getElementById("last_scramble").innerHTML = `<span>Last scramble: ${window.lastScramble}` +
-            ` <span onclick='showHint(this,${lastCase})' class='caseNameStats'>(${algsInfo[lastCase]["name"]})</span></span><span class='material-symbols-outlined inlineButton' onclick='confirmUnsel(${lastCase})'>close</span>`;
+            ` <span onclick='showHint(this,${lastCase})' class='caseNameStats'>(${algsInformation[lastCase]["name"]})</span></span><span class='material-symbols-outlined inlineButton' onclick='confirmUnsel(${lastCase})'>close</span>`;
     displayPracticeInfo();
     // get random case
     var caseNum = 0;
@@ -287,7 +287,7 @@ function editAlg() {
     else {
         document.getElementById('algorithmsInput').disabled = true
         document.getElementById('editAlgButton').innerText = 'edit'
-        var caseAlgsInfo = JSON.parse(JSON.stringify(algsInfo[hintCase]));
+        var caseAlgsInfo = JSON.parse(JSON.stringify(algsInformation[hintCase]));
         caseAlgsInfo["a"] = textArea.value.split('\n').filter((line) => line.length > 0)
         customAlgs[hintCase] = caseAlgsInfo
         saveAlgs() 
@@ -298,7 +298,7 @@ function editAlg() {
 
 function renderHint(i) {
     document.getElementById('editAlgButton').innerText = "edit"
-    document.getElementById("boxTitle").innerHTML = `${algsInfo[i]['algset']} ${algsInfo[i]['group']} ${algsInfo[i]['name']}`;
+    document.getElementById("boxTitle").innerHTML = `${algsInformation[i]['algset']} ${algsInformation[i]['group']} ${algsInformation[i]['name']}`;
     var longestAlgLength = 0;
     var currentAlgs = algsInformation[i]["a"]
     if (i in customAlgs) {
@@ -313,7 +313,7 @@ function renderHint(i) {
     }
     algsStr += "</textarea></div>"
     document.getElementById('prevButton').style.opacity = i == 1 ? 0 : 1;
-    document.getElementById('nextButton').style.opacity = i == Object.keys(algsInfo).length ? 0 : 1;
+    document.getElementById('nextButton').style.opacity = i == Object.keys(algsInformation).length ? 0 : 1;
     document.getElementById("boxalg").innerHTML = algsStr;
     document.getElementById("boxsetup").innerHTML = "Setup:<br/>" + scramblesMap[i][0];
     document.getElementById("boxImg").src = blobUrls[i];
@@ -371,7 +371,7 @@ function uploadCustomAlgs() {
 }
 
 function nextCase() {
-    var length = Object.keys(algsInfo).length;
+    var length = Object.keys(algsInformation).length;
     hintCase = Math.min(hintCase + 1, length);
     renderHint(hintCase);
 }

@@ -18,11 +18,12 @@ function outputAlgs(k) {
         console.log("this is s");
         console.log(s);
    // }
-    s = "<div class='colFlex' style='width: fit-content'> <div class='borderedContainer " + (allSelected ? "itemSel" : "itemUnsel") + " pad groupNameDiv'" + s;
+    s = "<div class='colFlex' style='width: fit-content'> <div class='borderedContainer itemUnsel'" + s;
     s += "</div></div>";
     console.log("from outputAlgs");
     console.log(s);
     document.getElementById("cases_selection").innerHTML += s;
+    selCases = [];
     return s;
 }
 
@@ -115,6 +116,7 @@ function createGroup(){
         console.log(customGroupName);
         let caseToCheck = document.getElementById("itemTd" + i);
         if (caseToCheck.classList.contains("itemSel")){ //gets cases
+
             caseToCheck.className = 'borderedContainer itemUnsel pad'; //unselect after adding to group
             var index = selCases.indexOf(i);
             selCases.splice(index, 1);
@@ -122,20 +124,70 @@ function createGroup(){
             console.log("case: " + i + " is selected");
 
             let caseElement = document.getElementById("itemTd" + i); //the case itself
-            casesContainer.appendChild(caseElement); //add case
-
+            let wrapper = caseElement.parentElement; //this gives the weird spacing issue
+            //casesContainer.appendChild(caseElement.parentElement); //add case  parent element because there's 3 layers of divs lol
+            casesContainer.appendChild(caseElement); 
+            
             selCasesArr.push(i);
             algsGroups[customGroupName] = selCasesArr; //enter into algsGroups
             algsInformation[i].group = customGroupName; //enter into algsinfo
             console.log(algsInformation);
 
+            wrapper.remove();
+
             //itemClicked(i); //to make sure it's not buggy
         }
     }
-
+    createGroupName.value = "";
     return;
 }
 
 function createSet(){
+    let customSetName = createSetName.value;
+    console.log(customSetName);
+    let selGroupsArr = [];
 
+    const setContainer = document.createElement('div');
+    setContainer.className = "setContainer";
+    setContainer.id = "setContainer" + customSetName;
+    document.getElementById("cases_selection").appendChild(setContainer);
+
+    const setBar = document.createElement('div');
+    setBar.className = "borderedContainer pad setBar";
+    setBar.id = "setBar" + customSetName;
+    setBar.innerText = customSetName;
+    setContainer.appendChild(setBar);
+
+    for (i = 1; i <= Object.keys(algsGroups).length; i++) {
+        console.log("checking group " + i);
+        let groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
+        if (groupBarEl.classList.contains("itemSel")){
+            console.log(Object.keys(algsGroups)[i - 1] + " is selected");
+            let selectedGroupName = Object.keys(algsGroups)[i - 1]
+            selGroupsArr.push(selectedGroupName); //preparing the algsets for algsets object
+
+            groupBarEl.className = "borderedContainer itemUnsel pad groupNameDiv groupBar" //to unselect bar
+
+            let selectedGroupContainerId = "groupContainer" + selectedGroupName;
+            setContainer.appendChild(document.getElementById(selectedGroupContainerId));
+
+            for (selectedCase of algsGroups[selectedGroupName]) {
+                console.log(selectedCase);
+                console.log(document.getElementById("itemTd" + selectedCase))
+                let selectedEl = document.getElementById("itemTd" + selectedCase);
+                if(selectedEl.classList.contains("itemSel")){
+                    selectedEl.classList.remove("itemSel");
+                    selectedEl.classList.add("itemUnsel"); //unselect individual cases after moving
+                }
+                algsInformation[selectedCase]["algset"] = customSetName;
+                console.log(algsInformation);
+            }
+
+            algsets[customSetName] = selGroupsArr;
+            console.log(algsets);
+            
+        }
+    }
+    createSetName.value = "";
+    return;
 }
