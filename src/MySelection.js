@@ -99,12 +99,18 @@ function createGroup(){
     document.getElementById("cases_selection").appendChild(groupContainer);
 
     let groupBar = document.createElement('div'); //creates group bar
+    let deleteGroup = document.createElement('span');
+    deleteGroup.className = "material-symbols-outlined inlineButton"
+    deleteGroup.innerHTML = "delete";
+    deleteGroup.onclick = () => deleteGroup(customGroupName);
+    console.log(deleteGroup);
     groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
     groupBar.onclick = () => selectCaseGroup(customGroupName);
 
     groupBar.id = "groupBar" + customGroupName;
     groupBar.innerText = customGroupName;
     groupContainer.appendChild(groupBar);
+    groupBar.appendChild(deleteGroup);
 
     let casesContainer = document.createElement('div');
     casesContainer.id = "casesContainer";
@@ -183,6 +189,12 @@ function createSet(){
                 console.log(algsInformation);
             }
 
+            for (j = 1; j <= algsGroups[selectedGroupName].length; j++){
+                let CaseNumber = algsGroups[selectedGroupName][j];
+                var index = selCases.indexOf(CaseNumber);
+                selCases.splice(index, 1);
+            } //removes cases after selecting
+
             algsets[customSetName] = selGroupsArr;
             console.log(algsets);
             
@@ -190,4 +202,8 @@ function createSet(){
     }
     createSetName.value = "";
     return;
+}
+
+function deleteGroup (){ //as the name suggests it removes the group bar and cases
+
 }
