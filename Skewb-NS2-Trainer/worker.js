@@ -21,8 +21,6 @@ function main(input) {
     let caseNum = 1;
     let solutionIndex = 1;
     for (let stateStr of batchStates) {
-        console.log("stateStr " + stateStr);
-        console.log("batchStates " + batchStates);
         let state = fullPuzzle.execute(fullPuzzle.solved, fullPuzzle.moveStrToList(stateStr));
         if (!(arraysEqual(fullPuzzle.solved, state))) {
             if (caseNum >= startNum || modifiers.has(caseNum)) {
