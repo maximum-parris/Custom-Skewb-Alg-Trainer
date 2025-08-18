@@ -9,6 +9,9 @@ Object.assign(selectionPresets['Default']['selCases'], selCases);
 Object.assign(selectionPresets['Default']['selectedAlgSets'], selectedAlgSets);
 function getAlgsetIds(algset) {
     var algsetIds = []
+    console.log("in getAlgsetIds");
+    console.log(algsets);
+    console.log(algset);
     for (const group of algsets[algset]) {
         algsetIds = algsetIds.concat(algsGroups[group]);
     }
@@ -65,9 +68,13 @@ function updateTitle() {
     var algs = getAllValid().length;
     var allSelector = document.getElementById('allSelector');
     if (selCases.length == algs) {
-        allSelector.className = 'borderedContainer itemSel pad';
+        //allSelector.className = 'borderedContainer itemSel pad';
+        allSelector.classList.remove("itemUnsel");
+        allSelector.classList.add("itemSel");
     } else {
-      allSelector.className = 'borderedContainer itemUnsel pad';
+        //allSelector.className = 'borderedContainer itemUnsel pad';
+        allSelector.classList.remove("itemSel");
+        allSelector.classList.add("itemUnsel");
     }
     for (const [algset, isShown] of Object.entries(selectedAlgSets)) {
         if (isShown && Object.keys(selectedAlgSets).length > 1) {
@@ -93,13 +100,7 @@ function itemClicked(i) {
     else
         selCases.push(i);
     var element = document.getElementById("itemTd" + i);
-    console.log("this is element");
-    console.log(element);
-    console.log("before className edit");
-    console.log(element.classList);
     element.className = (wasSelected ? "itemUnsel" : "itemSel") + " borderedContainer";
-    console.log("after classList");
-    console.log(element.classList);
     //var groupElement = element.parentElement.previousElementSibling;
     /* console.log("this is groupElement");
     console.log(groupElement);
@@ -125,7 +126,9 @@ function itemClicked(i) {
     //var groupWasSelected = groupElement.classList[1] == 'itemSel';
     var groupWasSelected = groupElement.classList.contains('itemSel'); //probabaly safer
     if (groupWasSelected && wasSelected) {
-        groupElement.className = 'borderedContainer itemUnsel pad groupNameDiv';
+       // groupElement.className = 'borderedContainer itemUnsel pad groupNameDiv';
+        groupElement.classList.remove("itemSel");
+        groupElement.classList.add("itemUnsel");
     }
     if (!groupWasSelected && !wasSelected) {
         var groupElements = element.parentElement.childNodes;
@@ -134,7 +137,9 @@ function itemClicked(i) {
             selectedCount += groupElements[i].classList.contains('itemSel');
         }
         if (selectedCount == groupElements.length) {
-            groupElement.className = 'borderedContainer itemSel pad groupNameDiv';
+            //groupElement.className = 'borderedContainer itemSel pad groupNameDiv';
+            groupElement.classList.remove("itemUnsel");
+            groupElement.classList.add("itemSel");
         }
     }
     saveSelection();
@@ -154,7 +159,7 @@ function selectAllNone() {
     } else {
         selCases = [];
     }
-    renderSelection();
+    //renderSelection();
     saveSelection();
     resize();
 }
@@ -188,9 +193,13 @@ function selectCaseGroup(name) {
         }
     }
     if (allSelected) {
-        groupNameDiv.className = 'borderedContainer itemUnsel pad groupNameDiv';
+        //groupNameDiv.className = 'borderedContainer itemUnsel pad groupNameDiv';
+        groupNameDiv.classList.remove("itemSel");
+        groupNameDiv.classList.add("itemUnsel");
     } else {
-        groupNameDiv.className = 'borderedContainer itemSel pad groupNameDiv'
+        //groupNameDiv.className = 'borderedContainer itemSel pad groupNameDiv'
+        groupNameDiv.classList.remove("itemUnsel");
+        groupNameDiv.classList.add("itemSel");
     }
     saveSelection();
     //updateTitle();
@@ -247,7 +256,7 @@ function ensureSelectionMatchesShown() {
 
 
 
-function selectAlgset(algset) {
+/* function selectAlgset(algset) {
     var algsetIds = getAlgsetIds(algset);
 
     var selectedCount = 0;
@@ -265,10 +274,10 @@ function selectAlgset(algset) {
         }
     }
     selectedAlgSets[algset] = selectedCount != 0 | !selectedAlgSets[algset];
-    renderSelection();
+    //renderSelection();
     saveSelection();
-    resize();
-}
+    //resize();
+} */
 
 function makeAlgsetTitle(algset, enabled) {
     // var width = Math.max((95 / Object.keys(algsets).length), 20) + "%";
@@ -321,7 +330,7 @@ function deletePreset(name) {
 function usePreset(name) {
     selCases = [...selectionPresets[name]['selCases']];
     Object.assign(selectedAlgSets, selectionPresets[name]['selectedAlgSets']);
-    renderSelection();
+    //renderSelection();
 }
 
 
@@ -370,13 +379,13 @@ function renderSelection() {
     document.getElementById("cases_selection").innerHTML = s;
     ensureSelectionMatchesShown();
     //updateTitle();
-    renderPresets();
+    //renderPresets();
 }
 
 
 function saveSelection() {
     localStorage.setItem(selectionArrayKey, JSON.stringify(selCases));
-    localStorage.setItem(selectionArrayKey + "AlgSets", JSON.stringify(selectedAlgSets));
+    //localStorage.setItem(selectionArrayKey + "AlgSets", JSON.stringify(selectedAlgSets));
 }
 
 function loadSelection() {

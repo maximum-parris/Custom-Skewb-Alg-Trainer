@@ -37,7 +37,7 @@ function showMode(m)
     else if (m == 'select') {
         // select
         recapArray = [];
-        renderSelection();
+        //renderSelection();
         //testing
     }
     resize('');

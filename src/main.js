@@ -28,7 +28,7 @@ function resize(event) {
         document.getElementById("modeButtons").style.transform = "unset";
     }
     document.getElementById('modeButtons').style.right = right + 'px';
-}
+} 
 
 function main() {
     //fie input

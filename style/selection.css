@@ -140,9 +140,27 @@ input#createGroupName {
 
 .setBar {
     background-color: black;
+    margin-bottom: 0.3em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.deleteButton {
+.groupBar .deleteButton {
     color: var(--primaryText);
     font-size: 1.2em; 
+}
+
+.setBar .deleteButton {
+    font-size: 1.2em;
+    color: var(--secondaryHover);
+}
+
+.allSel {
+    width:100%
+}
+
+.setSel {
+    flex-wrap: wrap;
+    max-width: 300px;
 }

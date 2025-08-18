@@ -80,6 +80,22 @@ function initSelection() {
         console.warn("#cases_selection not found, appending to container instead.");
         container.appendChild(addGroupContainer);
     }
+
+    const setSelectorContainer = document.createElement('div');
+    setSelectorContainer.id = "setSelectorContainer";
+    setSelectorContainer.className = "rowFlex setSel";
+    casesSelection.parentNode.insertBefore(setSelectorContainer, casesSelection);
+
+    const allSelContainer = document.createElement('div');
+    allSelContainer.id = "allSelContainer";
+    allSelContainer.className = "rowFlex";
+    casesSelection.parentNode.insertBefore(allSelContainer, setSelectorContainer);
+    const allSel = document.createElement('div');
+    allSel.id = "allSel";
+    allSel.className = "borderedContainer pad itemUnsel allSel";
+    allSel.innerHTML = "<b>" + "All" + " (<span id='allSelDisplay'>0</span>/" + customNumCases + ")</b>";
+    allSel.onclick = () => selectAllCases();
+    allSelContainer.appendChild(allSel);
     return;
 }
 
@@ -102,8 +118,8 @@ function createGroup(){
     let deleteGroupIcon = document.createElement('span');
     deleteGroupIcon.className = "material-symbols-outlined deleteButton"
     deleteGroupIcon.innerHTML = "delete";
-    deleteGroupIcon.onclick = (e) => {
-        e.stopPropagation(); // prevent triggering groupBar onclick
+    deleteGroupIcon.onclick = (e) => { // prevent triggering groupBar onclick
+        e.stopPropagation(); 
         deleteGroup(customGroupName);
     };
     groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
@@ -134,6 +150,9 @@ function createGroup(){
             let caseElement = document.getElementById("itemTd" + i); //the case itself
             let wrapper = caseElement.parentElement; //this gives the weird spacing issue
             //casesContainer.appendChild(caseElement.parentElement); //add case  parent element because there's 3 layers of divs lol
+            console.log("this is caseElement's classList");
+            console.log(caseElement.classList);
+            caseElement.classList.remove("pad");
             casesContainer.appendChild(caseElement); 
             
             selCasesArr.push(i);
@@ -154,6 +173,7 @@ function createSet(){
     let customSetName = createSetName.value;
     console.log(customSetName);
     let selGroupsArr = [];
+    let setAlgCount = 0;
 
     const setContainer = document.createElement('div');
     setContainer.className = "setContainer";
@@ -164,6 +184,14 @@ function createSet(){
     setBar.className = "borderedContainer pad setBar";
     setBar.id = "setBar" + customSetName;
     setBar.innerText = customSetName;
+    let deleteSetIcon = document.createElement('span');
+    deleteSetIcon.className = "material-symbols-outlined deleteButton"
+    deleteSetIcon.innerHTML = "delete";
+    deleteSetIcon.onclick = (e) => {
+        e.stopPropagation(); 
+        deleteSet(customSetName);
+    };
+    setBar.appendChild(deleteSetIcon);
     setContainer.appendChild(setBar);
 
     for (i = 1; i <= Object.keys(algsGroups).length; i++) {
@@ -195,19 +223,26 @@ function createSet(){
                 let CaseNumber = algsGroups[selectedGroupName][j];
                 var index = selCases.indexOf(CaseNumber);
                 selCases.splice(index, 1);
+                setAlgCount++;
             } //removes cases after selecting
 
             algsets[customSetName] = selGroupsArr;
             console.log(algsets);
-            
+            selectedAlgSets[customSetName] = false;
         }
     }
+    let selectSet = document.createElement('div');
+    selectSet.id = customSetName + "selector";
+    selectSet.className = "borderedContainer itemUnsel pad";
+    selectSet.onclick = () => selectAlgset(customSetName, setAlgCount);
+    selectSet.innerHTML = "<b>" + customSetName + " (<span id='" + customSetName + "csi'>0</span>/" + setAlgCount + ")</b>"; // so this should look like "NS2 (0/131)"
+    document.getElementById("setSelectorContainer").appendChild(selectSet);
     createSetName.value = "";
     return;
 }
 
 function deleteGroup(groupName){ //as the name suggests it removes the group bar and cases
-    if(confirm("Are you sure you want to remove group?")){
+    if(confirm("Are you sure you want to remove this group?")){
         let groupContainerToDelete = document.getElementById("groupContainer" + groupName);
 
         for (let caseNumber of algsGroups[groupName]) { //put cases back into unsorted area
@@ -235,4 +270,114 @@ function deleteGroup(groupName){ //as the name suggests it removes the group bar
 
         groupContainerToDelete.remove();
     }
+}
+
+function deleteSet (setName){
+    if(confirm("Are you sure you want to remove this set?")){
+        let setBarToDelete = document.getElementById("setBar" + setName);
+        let containerToDelete = document.getElementById("setContainer" + setName);
+        let setSelectorToDelete = document.getElementById(setName + "selector");
+
+        let childrenArr = Array.from(containerToDelete.children);
+        for (let containedGroup of childrenArr){
+            console.log("checking " + containedGroup);
+            if (containedGroup !== setBarToDelete) {//avoids the problem of moving setBar too
+                console.log("deleting " + containedGroup);
+                document.getElementById("cases_selection").appendChild(containedGroup);
+            }
+        }
+        setSelectorToDelete.remove()
+        setBarToDelete.remove();
+        containerToDelete.remove();
+    }
+}
+
+function selectAlgset(algset, algCount) {
+    let setSelButton = document.getElementById(algset + "selector");
+    if (setSelButton.classList.contains("itemSel")) {
+        setSelButton.classList.remove("itemSel");
+        setSelButton.classList.add("itemUnsel"); //unselect
+        setSelButton.querySelector("span").textContent = "0";
+
+        for (let group of algsets[algset]) {
+            let groupBar = document.getElementById("groupBar" + group);
+            if (groupBar.classList.contains("itemSel")) {
+                groupBar.click();
+            }
+        } //selects cases and shows them
+    } else {
+        setSelButton.classList.remove("itemUnsel");
+        setSelButton.classList.add("itemSel"); //select
+        setSelButton.querySelector("span").textContent = algCount;
+
+        for (let group of algsets[algset]) {
+            let groupBar = document.getElementById("groupBar" + group);
+            if (groupBar.classList.contains("itemUnsel")) {
+                groupBar.click();
+            }
+        } //selects cases and shows them
+    }
+    var algsetIds = getAlgsetIds(algset);
+    var selectedCount = 0;
+    for (const idx of algsetIds) {
+        selectedCount += selCases.includes(idx);
+    }
+    var allSelected = selectedCount == algsetIds.length;
+    selectedAlgSets[algset] = selectedCount != 0 | !selectedAlgSets[algset];
+    saveSelection();
+    
+    
+}
+
+function selectAllCases() {
+    let allSel = document.getElementById("allSel");
+    if (allSel.classList.contains("itemUnsel")) {
+        allSel.classList.remove("itemUnsel");
+        allSel.classList.add("itemSel"); //select
+
+        allSel.innerHTML = "<b>" + "All" + " (<span id='allSelDisplay'>" + customNumCases + "</span>/" + customNumCases + ")</b>";
+
+        for (let CASE of Object.keys(algsInformation)) { //clicks elements
+            let caseEl = document.getElementById("itemTd" + CASE);
+            if (caseEl.classList.contains("itemUnsel")) {
+                caseEl.click();
+            }
+        }
+        for (let groupNAME of Object.keys(algsGroups)) { //clicks group
+            let groupEl = document.getElementById("groupBar" + groupNAME);
+            if (groupEl.classList.contains("itemUnsel")) {
+                groupEl.click();
+            }
+        }
+        for (let setNAME of Object.keys(algsets)) { //clicks sets
+            let setEl = document.getElementById(setNAME + "selector");
+            if (setEl.classList.contains("itemUnsel")) {
+                setEl.click();
+            }
+        }
+    } else {
+        allSel.classList.remove("itemSel");
+        allSel.classList.add("itemUnsel"); //unselect
+        allSel.innerHTML = "<b>" + "All" + " (<span id='allSelDisplay'>0</span>/" + customNumCases + ")</b>";
+
+        for (let CASE of Object.keys(algsInformation)) { //clicks elements
+            let caseEl = document.getElementById("itemTd" + CASE);
+            if (!caseEl.classList.contains("itemUnsel")) {
+                caseEl.click();
+            }
+        }
+        for (let groupNAME of Object.keys(algsGroups)) { //clicks group
+            let groupEl = document.getElementById("groupBar" + groupNAME);
+            if (!groupEl.classList.contains("itemUnsel")) {
+                groupEl.click();
+            }
+        }
+        for (let setNAME of Object.keys(algsets)) { //clicks sets
+            let setEl = document.getElementById(setNAME + "selector");
+            if (!setEl.classList.contains("itemUnsel")) {
+                setEl.click();
+            }
+        }
+    }
+
 }

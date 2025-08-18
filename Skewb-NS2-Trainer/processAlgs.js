@@ -8,6 +8,7 @@ let y = "#ffcf3d";
 let r = "#fa2e2e";
 let b = "#4264fa";
 var progressBar;
+var customNumCases = 0;
 //var fileInput = document.getElementById("csvUploader");
 var scrGenned = 0;
 const isMove = /^[rRbB]/; //else it's a rotation.
@@ -65,8 +66,8 @@ function processAlgSet(csvArr) {
 
   console.log("this is csvArr");
   console.log(csvArr);
-  numCases = csvArr.length;
-  console.log("numCases: " + numCases);
+  customNumCases = csvArr.length;
+  console.log("numCases: " + customNumCases);
   let invArr = [];
   for(i=0; i<csvArr.length; i++){
     let Case = csvArr[i]
@@ -81,7 +82,7 @@ function processAlgSet(csvArr) {
 }
 
 function updateProgressBar(scrGenned){
-  progressBar.innerText = "Progress: " + scrGenned + "/" + numCases;
+  progressBar.innerText = "Progress: " + scrGenned + "/" + customNumCases;
 } 
 
 function initProgressBar () {
@@ -189,7 +190,7 @@ function getScrambles (invArr){
                   progressBar.innerText += " Done!"
                   console.log("algs done");
                   initSelection();
-                  renderSelection();
+                  //renderSelection();
                   work.terminate();
                   return;
                 } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.

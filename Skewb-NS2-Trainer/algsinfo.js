@@ -6,7 +6,8 @@ var postRotations = [''];
 var preMoves = [""];
 var postMoves = preMoves;
 var selCases = [];
-var selectedAlgSets = { "NS2": false, "EG2": false }; //gotta modify this too
+var selectedAlgSets = {};
+//{ "NS2": false, "EG2": false }; //gotta modify this too
 var maxAlgsPerRow = 8;
 
 var algsGroups = {}; /*= 
