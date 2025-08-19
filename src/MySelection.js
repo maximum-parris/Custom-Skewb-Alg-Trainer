@@ -395,6 +395,7 @@ async function exportXLSX() {
         groupCount = 0;
         const setSheet = workbook.addWorksheet(set);
         for (let group of Object.keys(algsGroups)) {
+            let caseCount = 0;
             setSheet.getCell(groupCount * 7 + 1, 1).value = group;
             for (let caseID of algsGroups[group]) {
                 setSheet.getCell(groupCount * 7 + 1, caseCount) = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
