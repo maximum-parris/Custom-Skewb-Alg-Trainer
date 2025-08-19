@@ -389,15 +389,31 @@ function selectAllCases() {
 
 async function exportXLSX() {
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Sheet1");
+    for (let set of Object.keys(algsets)){
+        groupCount = 0;
+        const setSheet = workbook.addWorksheet(set);
+        for (let group of Object.keys(algsGroups)) {
+            setSheet.getCell(groupCount * 7 + 1, 1).value = group;
+            for (let caseID of algsGroups[group]) {
+                setSheet.getCell(groupCount * 7 + 1, caseCount) = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
+                setSheet.getCell(groupCount * 7 + 2, caseCount) = algsInformation[caseID].name;
+                setSheet.getCell(groupCount * 7 + 3, caseCount) = algsInformation[caseID].a;
+                caseCount++;
+            }
+            groupCount++;
+        }
+    }
 
+    //const sheet = workbook.addWorksheet("Sheet1");
+
+/*
     // 2) Write "hello world" to A1 (row 1, col 1)
     sheet.getCell(1, 1).value = "hello world";
 
     // Sheet 2
     const sheet2 = workbook.addWorksheet("Sheet2");
     sheet2.getCell(1, 1).value = "This is Sheet 2";
-
+*/
     // 3) Generate bytes and download
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
