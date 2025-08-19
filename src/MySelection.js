@@ -400,9 +400,12 @@ async function exportXLSX() {
             for (let caseID of algsGroups[group]) {
                 console.log(caseCount);
                 console.log(groupCount * 7 + 1);
-                setSheet.getCell(groupCount * 7 + 1, caseCount) = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
-                setSheet.getCell(groupCount * 7 + 2, caseCount) = algsInformation[caseID].name;
-                setSheet.getCell(groupCount * 7 + 3, caseCount) = algsInformation[caseID].a;
+                let caseImage = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
+                let caseName = algsInformation[caseID].name;
+                let caseAlg = algsInformation[caseID].a;
+                setSheet.getCell(groupCount * 7 + 1, caseCount) = caseImage;
+                setSheet.getCell(groupCount * 7 + 2, caseCount) = caseName;
+                setSheet.getCell(groupCount * 7 + 3, caseCount) = caseAlg;
                 console.log(setSheet.getCell(groupCount * 7 + 1, caseCount) = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src);
                 console.log(setSheet.getCell(groupCount * 7 + 2, caseCount) = algsInformation[caseID].name);
                 console.log(setSheet.getCell(groupCount * 7 + 3, caseCount) = algsInformation[caseID].a);
