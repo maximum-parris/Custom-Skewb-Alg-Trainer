@@ -36,7 +36,6 @@ function main() {
     fileInput.type = 'file';
     fileInput.id = 'csvUploader';
     fileInput.accept = '.csv';
-    fileInput.style.margin = '20px';
     fileInput.style.display = 'block';
     document.body.insertBefore(fileInput, document.body.firstChild);
 

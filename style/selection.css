@@ -88,9 +88,9 @@ button#actg {
 div#addSetContainer,
 div#addGroupContainer {
     background-color: var(--background);
-    justify-content: center; 
-    align-items: center;     
-    gap: 0.5em;               
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
     padding: 0.2 0.5em;
 
     border-width: var(--borderWidth);
@@ -148,7 +148,7 @@ input#createGroupName {
 
 .groupBar .deleteButton {
     color: var(--primaryText);
-    font-size: 1.2em; 
+    font-size: 1.2em;
 }
 
 .setBar .deleteButton {
@@ -157,10 +157,25 @@ input#createGroupName {
 }
 
 .allSel {
-    width:100%
+    width: 100%
 }
 
 .setSel {
     flex-wrap: wrap;
-    max-width: 300px;
+    max-width: 570px;
+}
+
+input#fileNameEntry {
+    border-radius: 0.3em;
+    height: fit-content;
+    cursor: pointer;
+    border-color: white;
+    width: 7em;
+    margin: 0;
+    padding: 0;
+    font-size: 1em;
+    text-align: left;
+    background-color: var(--background) oklch(33% 0 0);
+    color: var(--text);
+    margin: 20px;
 }

@@ -102,6 +102,11 @@ function initSelection() {
     downloadButton.textContent = "Download sheet"
     downloadButton.onclick = () => exportXLSX();
     document.getElementById("progress").parentElement.appendChild(downloadButton);
+
+    const fileNameBox = document.createElement('input');
+    fileNameBox.id = "fileNameEntry";
+    fileNameBox.placeholder = "File Name";
+    document.getElementById("progress").parentElement.appendChild(fileNameBox);
     return;
 }
 
@@ -390,6 +395,7 @@ function selectAllCases() {
 async function exportXLSX() {
     console.log("genning export");
     const workbook = new ExcelJS.Workbook();
+    let fileName = document.getElementById("fileNameEntry").value;
     for (let set of Object.keys(algsets)){
         console.log("exporting set: " + set)
         groupCount = 0;
@@ -456,7 +462,7 @@ async function exportXLSX() {
     const url = URL.createObjectURL(blob); //does something lol
     const a = document.createElement("a");
     a.href = url;
-    a.download = "algSheet.xlsx";
+    a.download = fileName + ".xlsx";
     document.body.appendChild(a);
     a.click();
     a.remove();
