@@ -394,16 +394,43 @@ async function exportXLSX() {
         console.log("exporting set: " + set)
         groupCount = 0;
         const setSheet = workbook.addWorksheet(set);
-        for (let group of Object.keys(algsGroups)) {
+        for (let group of (algsets[set])) {
             let caseCount = 2; //so it starts on column 2, 1 is group name
             setSheet.getCell(groupCount * 7 + 1, 1).value = group;
+            setSheet.getCell(groupCount * 7 + 1, 1).font = { //make group name bigger
+                name: 'Arial',      // font family
+                size: 16,           // font size in points
+                bold: true         // optional
+            };
+            setSheet.getColumn(1).width = 10;
             for (let caseID of algsGroups[group]) {
                 let caseImage = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
                 let caseName = algsInformation[caseID].name;
                 let caseAlg = algsInformation[caseID].a[0];
-                setSheet.getCell(groupCount * 7 + 1, caseCount).value = caseImage;
+
                 setSheet.getCell(groupCount * 7 + 2, caseCount).value = caseName;
                 setSheet.getCell(groupCount * 7 + 3, caseCount).value = caseAlg;
+
+                const response = await fetch(caseImage);
+                const blob = await response.blob();
+
+                // Convert SVG blob → string → PNG base64
+                const svgString = await blob.text();
+                const base64 = await svgToPngBase64(svgString, 156, 93.675);
+
+                const imageId = workbook.addImage({
+                    base64: base64,
+                    extension: 'png',
+                });
+
+                setSheet.getColumn(caseCount).width = 25;
+                setSheet.getRow(groupCount * 7 + 1).height = 90;
+
+                setSheet.addImage(imageId, {
+                    tl: { col: caseCount - 1, row: groupCount * 7 },
+                    ext: { width: 156, height: 93.675},
+                });
+
                 caseCount++;
             }
             groupCount++;
@@ -434,4 +461,30 @@ async function exportXLSX() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+}
+
+async function svgToPngBase64(svgString, width = 156, height = 93.675) {
+  return new Promise((resolve, reject) => {
+    // 1. Create an Image object
+    const img = new Image();
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      // 2. Draw onto a canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // 3. Convert to base64 PNG
+      const pngBase64 = canvas.toDataURL('image/png');
+      URL.revokeObjectURL(url);
+      resolve(pngBase64);
+    };
+
+    img.onerror = reject;
+    img.src = url;
+  });
 }
