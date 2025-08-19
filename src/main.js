@@ -32,12 +32,16 @@ function resize(event) {
 
 function main() {
     //fie input
+    const startingContainer = document.createElement('div');
+    startingContainer.className = "input-box";
+    startingContainer.id = "startingContainer";
+    document.body.insertBefore(startingContainer, document.getElementById("selectionLayout"))
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.id = 'csvUploader';
     fileInput.accept = '.csv';
     fileInput.style.display = 'block';
-    document.body.insertBefore(fileInput, document.body.firstChild);
+    startingContainer.appendChild(fileInput);
 
     //get file
     fileInput.addEventListener('change', (event) => {

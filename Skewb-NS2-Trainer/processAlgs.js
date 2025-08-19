@@ -9,6 +9,7 @@ let r = "#fa2e2e";
 let b = "#4264fa";
 var progressBar;
 var customNumCases = 0;
+var quickGenBool = false; //this is for the quick render
 //var fileInput = document.getElementById("csvUploader");
 var scrGenned = 0;
 const isMove = /^[rRbB]/; //else it's a rotation.
@@ -62,8 +63,6 @@ const stickerPoints = {
 
 function processAlgSet(csvArr) {
   initProgressBar();
-//  initSelection();
-
   console.log("this is csvArr");
   console.log(csvArr);
   customNumCases = csvArr.length;
@@ -71,7 +70,7 @@ function processAlgSet(csvArr) {
   let invArr = [];
   for(i=0; i<csvArr.length; i++){
     let Case = csvArr[i]
-    algsInformation[i + 1] = {"a": [Case.a], "name": Case.name};
+    algsInformation[i + 1] = {"a": [Case.a], "name": Case.name, "group": Case.group, "algset": Case.algset};
     console.log("this is algsinfo");
     console.log(algsInformation);
     invArr.push(flipAlg(Case.a)); //gets inverse of algs
@@ -94,6 +93,7 @@ function initProgressBar () {
   progressBar.id = 'progress';
   progressBar.style.margin = '20px';
   progressBar.style.display = 'block';
+  document.getElementById("startingContainer").remove();
   container.appendChild(fileInput);
   container.appendChild(progressBar);
   document.body.insertBefore(container, document.body.firstChild);
@@ -190,6 +190,7 @@ function getScrambles (invArr){
                   progressBar.innerText += " Done!"
                   console.log("algs done");
                   initSelection();
+                  checkPostRender();
                   //renderSelection();
                   work.terminate();
                   return;
@@ -557,4 +558,68 @@ function generateSVG (colourArr, k) {
   console.log(blobUrls);
   console.log(algsInformation);
   outputAlgs(k + 1);
+}
+/*
+function startQuickRender (inputArr) {
+  algsInformation = inputArr; //one variable done
+
+  //algs Groups and Sets here
+  let uniqueGroupNames = [];
+  for (i = 1; i <= Object.keys(algsInformation).length; i++) [
+    
+  ]
+
+}
+
+function getKeysByGroup(obj, groupName) {
+  return Object.keys(obj).filter(k => obj[k].group === groupName);
+} */
+
+function checkPostRender() {
+  console.log("running Post Render");
+  let uniqueGroupNames = [];
+  let uniqueSetNames = [];
+  for (m = 1; m <= Object.keys(algsInformation).length; m++) {
+    console.log("in for loop");
+    
+      let currentSetName = algsInformation[m].algset;
+      
+      if (!algsets[currentSetName] && currentSetName !== "") {
+        algsets[currentSetName] = []; //creates group within algset
+      } 
+
+      if (!algsets[currentSetName].includes(algsInformation[m].group) && algsInformation[m].group) {
+        algsets[currentSetName].push(algsInformation[m].group); //pushes group into set in algsets
+      }
+    if (!uniqueSetNames.includes(algsInformation[m].algset) && algsInformation[m].algset) {
+      uniqueSetNames.push(currentSetName);
+    }
+    if (!uniqueGroupNames.includes(algsInformation[m].group) && algsInformation[m].group) {
+      uniqueGroupNames.push(algsInformation[m].group);
+      algsGroups[algsInformation[m].group] = []; //to create the empty arrays
+    }
+    if (algsInformation[m].group){
+      let currentGroupName = algsInformation[m].group;
+      algsGroups[currentGroupName].push(m);
+    }
+  }
+  console.log(uniqueGroupNames);
+  console.log(uniqueSetNames);
+  console.log(algsets);
+  console.log(algsGroups); //both work somehow
+  if (uniqueGroupNames.length > 1 || uniqueSetNames.length > 1) {
+    renderGroupsAndSets();
+  }
+}
+
+function renderGroupsAndSets() {
+  quickGenBool = true;
+  for (let currentGroup of Object.keys(algsGroups)) {
+    console.log(currentGroup);
+    createGroup(currentGroup);
+  }
+  for (let currentSet of Object.keys(algsets)) {
+    console.log(currentSet);
+    createSet(currentSet);
+  }
 }

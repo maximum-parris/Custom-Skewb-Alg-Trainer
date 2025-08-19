@@ -31,10 +31,6 @@ function initSelection() {
     console.log("GENNING BUTTONS");
 
     const container = document.querySelector(".borderedContainer");
-    if (!container) {
-        console.error("No container found for .borderedContainer");
-        return;
-    }
 
     const addGroupContainer = document.createElement('div');
     addGroupContainer.id = "addGroupContainer";
@@ -111,18 +107,17 @@ function initSelection() {
 }
 
 
-function createGroup(){
+function createGroup(preGroupName = null){
     console.log("creating groups");
-    let customGroupName = document.getElementById("createGroupName").value;
+    let customGroupName = "";
+    if (quickGenBool) {customGroupName = preGroupName} else {customGroupName = document.getElementById("createGroupName").value};
     if (!customGroupName) {return};
-    console.log(algsInformation);
 
     let selCasesArr = []; //these are the cases that are selected
 
     const groupContainer = document.createElement("div"); //contains group bar and cases;
     groupContainer.className = "groupContainer";
     groupContainer.id = "groupContainer" + customGroupName;
-   // document.getElementById("cases_selection").appendChild(groupContainer);
     document.getElementById("cases_selection").appendChild(groupContainer);
 
     let groupBar = document.createElement('div'); //creates group bar
@@ -145,44 +140,48 @@ function createGroup(){
     casesContainer.id = "casesContainer";
     casesContainer.classList = "rowFlex";
     groupContainer.appendChild(casesContainer);
-    
-    for (i = 1; i <= Object.keys(algsInformation).length; i++){
-        console.log("getting case: " + i);
-        console.log(customGroupName);
-        let caseToCheck = document.getElementById("itemTd" + i);
-        if (caseToCheck.classList.contains("itemSel")){ //gets cases
 
-            caseToCheck.className = 'borderedContainer itemUnsel pad'; //unselect after adding to group
-            var index = selCases.indexOf(i);
-            selCases.splice(index, 1);
+    if (!quickGenBool) {
+        console.log("YESSSSSS I SHOULD BE HERE");
+        for (i = 1; i <= Object.keys(algsInformation).length; i++){
+            let caseToCheck = document.getElementById("itemTd" + i);
+            if (caseToCheck.classList.contains("itemSel")){ //gets cases
 
-            console.log("case: " + i + " is selected");
+                caseToCheck.className = 'borderedContainer itemUnsel pad'; //unselect after adding to group
+                var index = selCases.indexOf(i);
+                selCases.splice(index, 1);
 
-            let caseElement = document.getElementById("itemTd" + i); //the case itself
-            let wrapper = caseElement.parentElement; //this gives the weird spacing issue
-            //casesContainer.appendChild(caseElement.parentElement); //add case  parent element because there's 3 layers of divs lol
-            console.log("this is caseElement's classList");
-            console.log(caseElement.classList);
-            caseElement.classList.remove("pad");
-            casesContainer.appendChild(caseElement); 
-            
-            selCasesArr.push(i);
-            algsGroups[customGroupName] = selCasesArr; //enter into algsGroups
-            algsInformation[i].group = customGroupName; //enter into algsinfo
-            console.log(algsInformation);
+                let caseElement = document.getElementById("itemTd" + i); //the case itself
+                let wrapper = caseElement.parentElement; //this gives the weird spacing issue
+                caseElement.classList.remove("pad");
+                casesContainer.appendChild(caseElement); 
+                
+                selCasesArr.push(i);
+                algsGroups[customGroupName] = selCasesArr; //enter into algsGroups
+                algsInformation[i].group = customGroupName; //enter into algsinfo
+
+                wrapper.remove();
+
+                //itemClicked(i); //to make sure it's not buggy
+            }
+        }
+    } else {
+        for (let selectedCase of algsGroups[preGroupName]) {
+            let caseToCheck = document.getElementById("itemTd" + selectedCase);
+            let wrapper = caseToCheck.parentElement; //this gives the weird spacing issue
+            caseToCheck.classList.remove("pad");
+            casesContainer.appendChild(caseToCheck); 
 
             wrapper.remove();
-
-            //itemClicked(i); //to make sure it's not buggy
         }
     }
     createGroupName.value = "";
     return;
 }
 
-function createSet(){
-    let customSetName = createSetName.value;
-    console.log(customSetName);
+function createSet(preSetName = null){
+    let customSetName = ""
+    if (quickGenBool) {customSetName = preSetName} else {customSetName = createSetName.value};
     let selGroupsArr = [];
     let setAlgCount = 0;
 
@@ -205,42 +204,49 @@ function createSet(){
     setBar.appendChild(deleteSetIcon);
     setContainer.appendChild(setBar);
 
-    for (i = 1; i <= Object.keys(algsGroups).length; i++) {
-        console.log("checking group " + i);
-        let groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
-        if (groupBarEl.classList.contains("itemSel")){
-            console.log(Object.keys(algsGroups)[i - 1] + " is selected");
-            let selectedGroupName = Object.keys(algsGroups)[i - 1]
-            selGroupsArr.push(selectedGroupName); //preparing the algsets for algsets object
+    if (!quickGenBool) {    
+        console.log("YESSSSSS I SHOULD BE HERE");
+        for (i = 1; i <= Object.keys(algsGroups).length; i++) {
+            let groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
+            if (groupBarEl.classList.contains("itemSel")){
+                let selectedGroupName = Object.keys(algsGroups)[i - 1];
+                selGroupsArr.push(selectedGroupName); //preparing the algsets for algsets object
 
-            groupBarEl.className = "borderedContainer itemUnsel pad groupNameDiv groupBar" //to unselect bar
+                groupBarEl.className = "borderedContainer itemUnsel pad groupNameDiv groupBar" //to unselect bar
 
-            let selectedGroupContainerId = "groupContainer" + selectedGroupName;
+                let selectedGroupContainerId = "groupContainer" + selectedGroupName;
+                setContainer.appendChild(document.getElementById(selectedGroupContainerId));
+
+                for (selectedCase of algsGroups[selectedGroupName]) {
+                    let selectedEl = document.getElementById("itemTd" + selectedCase);
+                    if(selectedEl.classList.contains("itemSel")){
+                        selectedEl.classList.remove("itemSel");
+                        selectedEl.classList.add("itemUnsel"); //unselect individual cases after moving
+                    }
+                    algsInformation[selectedCase]["algset"] = customSetName;
+                }
+
+                for (j = 1; j <= algsGroups[selectedGroupName].length; j++){
+                    let CaseNumber = algsGroups[selectedGroupName][j];
+                    var index = selCases.indexOf(CaseNumber);
+                    selCases.splice(index, 1);
+                    setAlgCount++;
+                } //removes cases after selecting
+
+                algsets[customSetName] = selGroupsArr;
+                selectedAlgSets[customSetName] = false;
+            }
+        }
+    } else {
+        for (let currentGroup of algsets[customSetName]) {
+            let selectedGroupContainerId = "groupContainer" + currentGroup;
             setContainer.appendChild(document.getElementById(selectedGroupContainerId));
 
-            for (selectedCase of algsGroups[selectedGroupName]) {
-                console.log(selectedCase);
-                console.log(document.getElementById("itemTd" + selectedCase))
-                let selectedEl = document.getElementById("itemTd" + selectedCase);
-                if(selectedEl.classList.contains("itemSel")){
-                    selectedEl.classList.remove("itemSel");
-                    selectedEl.classList.add("itemUnsel"); //unselect individual cases after moving
-                }
-                algsInformation[selectedCase]["algset"] = customSetName;
-                console.log(algsInformation);
-            }
-
-            for (j = 1; j <= algsGroups[selectedGroupName].length; j++){
-                let CaseNumber = algsGroups[selectedGroupName][j];
-                var index = selCases.indexOf(CaseNumber);
-                selCases.splice(index, 1);
-                setAlgCount++;
-            } //removes cases after selecting
-
-            algsets[customSetName] = selGroupsArr;
-            console.log(algsets);
-            selectedAlgSets[customSetName] = false;
+            for (j = 1; j <= algsGroups[currentGroup].length; j++){
+                    setAlgCount++;
+                } //removes cases after selecting
         }
+        selectedAlgSets[customSetName] = false;
     }
     let selectSet = document.createElement('div');
     selectSet.id = customSetName + "selector";
