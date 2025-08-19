@@ -400,7 +400,7 @@ async function exportXLSX() {
             for (let caseID of algsGroups[group]) {
                 let caseImage = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
                 let caseName = algsInformation[caseID].name;
-                let caseAlg = algsInformation[caseID].a;
+                let caseAlg = algsInformation[caseID].a[0];
                 setSheet.getCell(groupCount * 7 + 1, caseCount).value = caseImage;
                 setSheet.getCell(groupCount * 7 + 2, caseCount).value = caseName;
                 setSheet.getCell(groupCount * 7 + 3, caseCount).value = caseAlg;
