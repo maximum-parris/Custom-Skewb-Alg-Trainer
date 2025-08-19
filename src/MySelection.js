@@ -388,8 +388,10 @@ function selectAllCases() {
 }
 
 async function exportXLSX() {
+    console.log("genning export");
     const workbook = new ExcelJS.Workbook();
     for (let set of Object.keys(algsets)){
+        console.log("exporting set: " + set)
         groupCount = 0;
         const setSheet = workbook.addWorksheet(set);
         for (let group of Object.keys(algsGroups)) {
@@ -398,6 +400,9 @@ async function exportXLSX() {
                 setSheet.getCell(groupCount * 7 + 1, caseCount) = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
                 setSheet.getCell(groupCount * 7 + 2, caseCount) = algsInformation[caseID].name;
                 setSheet.getCell(groupCount * 7 + 3, caseCount) = algsInformation[caseID].a;
+                console.log(setSheet.getCell(groupCount * 7 + 1, caseCount) = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src);
+                console.log(setSheet.getCell(groupCount * 7 + 2, caseCount) = algsInformation[caseID].name);
+                console.log(setSheet.getCell(groupCount * 7 + 3, caseCount) = algsInformation[caseID].a);
                 caseCount++;
             }
             groupCount++;
@@ -423,7 +428,7 @@ async function exportXLSX() {
     const url = URL.createObjectURL(blob); //does something lol
     const a = document.createElement("a");
     a.href = url;
-    a.download = "hello.xlsx";
+    a.download = "algSheet.xlsx";
     document.body.appendChild(a);
     a.click();
     a.remove();
