@@ -398,6 +398,8 @@ async function exportXLSX() {
             let caseCount = 0;
             setSheet.getCell(groupCount * 7 + 1, 1).value = group;
             for (let caseID of algsGroups[group]) {
+                console.log(caseCount);
+                console.log(groupCount * 7 + 1);
                 setSheet.getCell(groupCount * 7 + 1, caseCount) = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
                 setSheet.getCell(groupCount * 7 + 2, caseCount) = algsInformation[caseID].name;
                 setSheet.getCell(groupCount * 7 + 3, caseCount) = algsInformation[caseID].a;
