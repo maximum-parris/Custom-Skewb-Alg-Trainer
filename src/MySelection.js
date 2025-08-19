@@ -395,7 +395,7 @@ async function exportXLSX() {
         groupCount = 0;
         const setSheet = workbook.addWorksheet(set);
         for (let group of Object.keys(algsGroups)) {
-            let caseCount = 0;
+            let caseCount = 1; //so it starts on column 1, not 0 lmao
             setSheet.getCell(groupCount * 7 + 1, 1).value = group;
             for (let caseID of algsGroups[group]) {
                 console.log(caseCount);
