@@ -135,6 +135,7 @@ function initSelection() {
         save();
         alert("Selection saved successfully!");
     };
+    document.getElementById("progress").parentElement.appendChild(saveButton);
     return;
 }
 
