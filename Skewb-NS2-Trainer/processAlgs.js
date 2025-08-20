@@ -93,7 +93,9 @@ function initProgressBar () {
   progressBar.id = 'progress';
   progressBar.style.margin = '20px';
   progressBar.style.display = 'block';
-  document.getElementById("startingContainer").remove();
+  if (document.getElementById("startingContainer")){
+    document.getElementById("startingContainer").remove();
+  }
   container.appendChild(fileInput);
   container.appendChild(progressBar);
   document.body.insertBefore(container, document.body.firstChild);
