@@ -588,17 +588,17 @@ function checkPostRender() {
         algsets[currentSetName] = []; //creates group within algset
       } 
 
-      if (!algsets[currentSetName].includes(algsInformation[m].group) && algsInformation[m].group) {
+      if (!algsets[currentSetName].includes(algsInformation[m].group) && algsInformation[m].group !== "") {
         algsets[currentSetName].push(algsInformation[m].group); //pushes group into set in algsets
       }
-    if (!uniqueSetNames.includes(algsInformation[m].algset) && algsInformation[m].algset) {
+    if (!uniqueSetNames.includes(algsInformation[m].algset) && algsInformation[m].algset !== "") {
       uniqueSetNames.push(currentSetName);
     }
-    if (!uniqueGroupNames.includes(algsInformation[m].group) && algsInformation[m].group) {
+    if (!uniqueGroupNames.includes(algsInformation[m].group) && algsInformation[m].group !== "") {
       uniqueGroupNames.push(algsInformation[m].group);
       algsGroups[algsInformation[m].group] = []; //to create the empty arrays
     }
-    if (algsInformation[m].group){
+    if (algsInformation[m].group !== ""){
       let currentGroupName = algsInformation[m].group;
       algsGroups[currentGroupName].push(m);
     }
