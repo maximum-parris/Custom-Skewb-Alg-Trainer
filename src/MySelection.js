@@ -115,7 +115,11 @@ function initSelection() {
             algsets = {};
             selectedAlgSets = {};
             customNumCases = 0;
+            document.getElementById("csvUploader").value = ""; // Clear the file input
+            document.getElementById("fileNameEntry").value = "";
+            document.getElementById("progress").textContent = "Progress: ";
             document.getElementById("allSelDisplay").textContent = "0";
+            document.getElementById("setSelectorContainer").innerHTML = "";
         }
     };
     document.getElementById("cases_selection").appendChild(allDeleteButton);
