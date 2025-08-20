@@ -103,6 +103,22 @@ function initSelection() {
     fileNameBox.id = "fileNameEntry";
     fileNameBox.placeholder = "File Name";
     document.getElementById("progress").parentElement.appendChild(fileNameBox);
+
+    const allDeleteButton = document.createElement('button');
+    allDeleteButton.id = "deleteAllBtn";
+    allDeleteButton.textContent = "Delete All Cases";
+    allDeleteButton.onclick = () => {
+        if (confirm("Are you sure you want to delete all cases? This cannot be undone.")) {
+            document.getElementById("cases_selection").innerHTML = "";
+            selCases = [];
+            algsGroups = {};
+            algsets = {};
+            selectedAlgSets = {};
+            customNumCases = 0;
+            document.getElementById("allSelDisplay").textContent = "0";
+        }
+    };
+    document.getElementById("cases_selection").appendChild(allDeleteButton);
     return;
 }
 
