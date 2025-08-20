@@ -587,9 +587,10 @@ function checkPostRender() {
       if (!algsets[currentSetName] && currentSetName !== "") {
         algsets[currentSetName] = []; //creates group within algset
       } 
-
-      if (!algsets[currentSetName].includes(algsInformation[m].group) && algsInformation[m].group !== "") {
-        algsets[currentSetName].push(algsInformation[m].group); //pushes group into set in algsets
+      if (algsets[currentSetName] !== undefined) {
+        if (!algsets[currentSetName].includes(algsInformation[m].group) && algsInformation[m].group !== "") {
+          algsets[currentSetName].push(algsInformation[m].group); //pushes group into set in algsets
+        }
       }
     if (!uniqueSetNames.includes(algsInformation[m].algset) && algsInformation[m].algset !== "") {
       uniqueSetNames.push(currentSetName);
