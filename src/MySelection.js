@@ -118,8 +118,10 @@ function initSelection() {
             document.getElementById("csvUploader").value = ""; // Clear the file input
             document.getElementById("fileNameEntry").value = "";
             document.getElementById("progress").textContent = "Progress: ";
-            document.getElementById("allSelDisplay").textContent = "0";
-            document.getElementById("setSelectorContainer").innerHTML = "";
+            document.getElementById("allSelContainer").remove();
+            document.getElementById("addGroupContainer").remove();
+            document.getElementById("addSetContainer").remove();
+            document.getElementById("setSelectorContainer").remove();
         }
     };
     document.getElementById("cases_selection").appendChild(allDeleteButton);
