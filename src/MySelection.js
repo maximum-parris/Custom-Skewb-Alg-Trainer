@@ -123,6 +123,7 @@ function initSelection() {
             document.getElementById("addSetContainer").remove();
             document.getElementById("setSelectorContainer").remove();            
             document.querySelector(".input-box").remove(); // Remove the file input box
+            main();
         }
     };
     document.getElementById("progress").parentElement.appendChild(allDeleteButton);
