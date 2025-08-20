@@ -115,14 +115,14 @@ function initSelection() {
             algsets = {};
             selectedAlgSets = {};
             customNumCases = 0;
-            document.querySelector(".input-box").remove(); // Remove the file input box
             document.getElementById("csvUploader").value = ""; // Clear the file input
             document.getElementById("fileNameEntry").value = "";
             document.getElementById("progress").textContent = "Progress: ";
             document.getElementById("allSelContainer").remove();
             document.getElementById("addGroupContainer").remove();
             document.getElementById("addSetContainer").remove();
-            document.getElementById("setSelectorContainer").remove();
+            document.getElementById("setSelectorContainer").remove();            
+            document.querySelector(".input-box").remove(); // Remove the file input box
         }
     };
     document.getElementById("progress").parentElement.appendChild(allDeleteButton);

@@ -179,3 +179,9 @@ input#fileNameEntry {
     color: var(--text);
     margin: 20px;
 }
+
+#deleteAllBtn {
+    background-color: var(--primaryBG);
+    height: 30px;
+    border-radius: 8px;
+}
