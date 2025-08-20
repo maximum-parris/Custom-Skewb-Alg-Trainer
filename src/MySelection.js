@@ -127,6 +127,14 @@ function initSelection() {
         }
     };
     document.getElementById("progress").parentElement.appendChild(allDeleteButton);
+
+    const saveButton = document.createElement('button');
+    saveButton.id = "saveBtn";
+    saveButton.textContent = "Save";
+    saveButton.onclick = () => {
+        save();
+        alert("Selection saved successfully!");
+    };
     return;
 }
 
@@ -523,4 +531,24 @@ async function svgToPngBase64(svgString, width = 156, height = 93.675) {
     img.onerror = reject;
     img.src = url;
   });
+}
+
+function save () {
+    var csv = "name, a, algset, group\n";
+    Object.keys(algsInformation).forEach((num) => {  
+        csv += algsInformation[num].name + ", " + algsInformation[num].a.join(" ") + ", " + algsInformation[num].algset + ", " + algsInformation[num].group + "\n";
+    });  
+
+    console.log(csv);
+
+    var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", "selection.csv");
+    document.body.appendChild(link); // Required for FF
+    link.click();
+    document.body.removeChild(link);
+    console.log("Selection saved successfully!");
+
+    algsInformation;
 }
