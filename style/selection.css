@@ -185,3 +185,9 @@ input#fileNameEntry {
     height: 30px;
     border-radius: 8px;
 }
+
+#saveBtn {
+    background-color: var(--primaryBG);
+    height: 30px;
+    border-radius: 8px;
+}

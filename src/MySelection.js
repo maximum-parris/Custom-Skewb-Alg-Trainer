@@ -135,7 +135,7 @@ function initSelection() {
         save();
         alert("Selection saved successfully!");
     };
-    document.getElementById("progress").parentElement.appendChild(saveButton);
+    document.getElementById("presetsSettings").parentElement.appendChild(saveButton);
     return;
 }
 
@@ -550,6 +550,4 @@ function save () {
     link.click();
     document.body.removeChild(link);
     console.log("Selection saved successfully!");
-
-    algsInformation;
 }
