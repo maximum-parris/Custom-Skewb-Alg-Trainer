@@ -64,7 +64,7 @@ function doMoveFSCR(move, multiplier) {
                 pos = 3;
                 ori++;
             } else if (pos == 6) {
-                ori--;
+                ori += 2;
             }
         } else if (turn == "R") {
             if (pos == 4) {
@@ -77,7 +77,7 @@ function doMoveFSCR(move, multiplier) {
                 pos = 4;
                 ori++;
             } else if (pos == 3) {
-                ori--;
+                ori += 2;
             }
         } else if (turn == "b") {
             if (pos == 2) {
@@ -90,7 +90,7 @@ function doMoveFSCR(move, multiplier) {
                 pos = 2;
                 ori++;
             } else if (pos == 7) {
-                ori--;
+                ori += 2;
             }
         } else if (turn == "B") {
             if (pos == 3) {
@@ -103,7 +103,7 @@ function doMoveFSCR(move, multiplier) {
                 pos = 3;
                 ori++;
             } else if (pos == 2) {
-                ori--;
+                ori += 2;
             }
         } else if (turn == "z") {
             if (pos == 1) {

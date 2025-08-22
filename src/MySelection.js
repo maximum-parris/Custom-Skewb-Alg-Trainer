@@ -108,34 +108,17 @@ function initSelection() {
     allDeleteButton.id = "deleteAllBtn";
     allDeleteButton.textContent = "Delete All Cases";
     allDeleteButton.onclick = () => {
-        if (confirm("Are you sure you want to delete all cases? This cannot be undone.")) {
-            document.getElementById("cases_selection").innerHTML = "";
-            selCases = [];
-            algsGroups = {};
-            algsets = {};
-            selectedAlgSets = {};
-            customNumCases = 0;
-            document.getElementById("csvUploader").value = ""; // Clear the file input
-            document.getElementById("fileNameEntry").value = "";
-            document.getElementById("progress").textContent = "Progress: ";
-            document.getElementById("allSelContainer").remove();
-            document.getElementById("addGroupContainer").remove();
-            document.getElementById("addSetContainer").remove();
-            document.getElementById("setSelectorContainer").remove();            
-            document.querySelector(".input-box").remove(); // Remove the file input box
-            main();
+        if (confirm("Are you sure you want to delete all cases?")) {
+            location.reload(true);
         }
     };
     document.getElementById("progress").parentElement.appendChild(allDeleteButton);
 
-    const saveButton = document.createElement('button');
-    saveButton.id = "saveBtn";
-    saveButton.textContent = "Save";
+    const saveButton = document.getElementById('saveBtn');
     saveButton.onclick = () => {
         save();
         alert("Selection saved successfully!");
     };
-    document.getElementById("presetsSettings").parentElement.appendChild(saveButton);
     return;
 }
 

@@ -76,7 +76,7 @@ function processAlgSet(csvArr) {
     invArr.push(flipAlg(Case.a)); //gets inverse of algs
   };
   console.log(invArr);
-  getScrambles(invArr);
+  getScrambles(csvArr);
   getColourArr(invArr); //gens colourArr + svgs + urls
 }
 
@@ -140,19 +140,19 @@ function flipAlg(alg){
   }
 
 
-function getScrambles (invArr){
+function getScrambles (csvArr){
   let scrambleList = [];
   work = new Worker("worker.js");
   let solvestring = "[";
-  for (let i=0; i<invArr.length; i++) {
-    console.log(invArr[i]);
+  for (let i=0; i<csvArr.length; i++) {
+    console.log(csvArr[i]);
     console.log("after replacement");
-    invArr[i] = invArr[i].replace(/(^|\s)(x2|x'|x|y2|y'|y)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
-    console.log(invArr[i]);
-    scrStr = invArr[i] + " " + startTracingProcess(invArr[i]);
+    let temp = csvArr[i].a.replace(/(^|\s)(x2|x'|x|y2|y'|y)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
+    console.log(temp);
+    scrStr = temp + " " + startTracingProcess(temp);
     console.log("scrStr: ");
     console.log(scrStr);
-    if (i != invArr.length - 1) {
+    if (i != csvArr.length - 1) {
     solvestring += scrStr + ", ";
     } else {
       solvestring += scrStr;
