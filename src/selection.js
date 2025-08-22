@@ -119,27 +119,26 @@ function itemClicked(i) {
             groupElement.className = 'borderedContainer itemSel pad groupNameDiv';
         }
     } */
-
-    var groupElement = document.getElementById("groupBar" + algsInformation[i]["group"]);
-    console.log("this is groupElement");
-    console.log(groupElement);
-    //var groupWasSelected = groupElement.classList[1] == 'itemSel';
-    var groupWasSelected = groupElement.classList.contains('itemSel'); //probabaly safer
-    if (groupWasSelected && wasSelected) {
-       // groupElement.className = 'borderedContainer itemUnsel pad groupNameDiv';
-        groupElement.classList.remove("itemSel");
-        groupElement.classList.add("itemUnsel");
-    }
-    if (!groupWasSelected && !wasSelected) {
-        var groupElements = element.parentElement.childNodes;
-        var selectedCount = 0;
-        for (var i = 0; i < groupElements.length; i++) {
-            selectedCount += groupElements[i].classList.contains('itemSel');
+    if (document.getElementById("groupBar" + algsInformation[i]["group"])) {
+        var groupElement = document.getElementById("groupBar" + algsInformation[i]["group"]);
+        //var groupWasSelected = groupElement.classList[1] == 'itemSel';
+        var groupWasSelected = groupElement.classList.contains('itemSel'); //probabaly safer
+        if (groupWasSelected && wasSelected) {
+        // groupElement.className = 'borderedContainer itemUnsel pad groupNameDiv';
+            groupElement.classList.remove("itemSel");
+            groupElement.classList.add("itemUnsel");
         }
-        if (selectedCount == groupElements.length) {
-            //groupElement.className = 'borderedContainer itemSel pad groupNameDiv';
-            groupElement.classList.remove("itemUnsel");
-            groupElement.classList.add("itemSel");
+        if (!groupWasSelected && !wasSelected) {
+            var groupElements = element.parentElement.childNodes;
+            var selectedCount = 0;
+            for (var i = 0; i < groupElements.length; i++) {
+                selectedCount += groupElements[i].classList.contains('itemSel');
+            }
+            if (selectedCount == groupElements.length) {
+                //groupElement.className = 'borderedContainer itemSel pad groupNameDiv';
+                groupElement.classList.remove("itemUnsel");
+                groupElement.classList.add("itemSel");
+            }
         }
     }
     saveSelection();
