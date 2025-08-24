@@ -223,7 +223,9 @@ function createSet(preSetName = null){
     if (!quickGenBool) {    
         console.log("YESSSSSS I SHOULD BE HERE");
         for (i = 1; i <= Object.keys(algsGroups).length; i++) {
-            let groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
+            if (Object.keys(algsGroups)[i - 1] !== " ") {
+                 let groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
+            } else {break;}
             if (groupBarEl.classList.contains("itemSel")){
                 let selectedGroupName = Object.keys(algsGroups)[i - 1];
                 selGroupsArr.push(selectedGroupName); //preparing the algsets for algsets object
