@@ -221,10 +221,11 @@ function createSet(preSetName = null){
     setContainer.appendChild(setBar);
 
     if (!quickGenBool) {    
+        let groupBarEl;
         console.log("YESSSSSS I SHOULD BE HERE");
         for (i = 1; i <= Object.keys(algsGroups).length; i++) {
-            if (Object.keys(algsGroups)[i - 1] !== " ") {
-                let groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
+            if (Object.keys(algsGroups)[i - 1] !== " " && Object.keys(algsGroups)[i - 1] !== "undefined") {
+                groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
             } else {continue;}
             if (groupBarEl.classList.contains("itemSel")){
                 let selectedGroupName = Object.keys(algsGroups)[i - 1];

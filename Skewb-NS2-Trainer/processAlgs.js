@@ -606,23 +606,24 @@ function checkPostRender() {
       algsGroups[currentGroupName].push(m);
     }
   }
-  console.log(uniqueGroupNames);
-  console.log(uniqueSetNames);
-  console.log(algsets);
-  console.log(algsGroups); //both work somehow
   if (uniqueGroupNames.length > 1 || uniqueSetNames.length > 1) {
     renderGroupsAndSets();
   }
 }
 
 function renderGroupsAndSets() {
-  quickGenBool = true;
   for (let currentGroup of Object.keys(algsGroups)) {
-    console.log(currentGroup);
-    createGroup(currentGroup);
+    if (currentGroup !== " " && currentGroup !== "undefined") {
+      quickGenBool = true;
+      createGroup(currentGroup);
+      quickGenBool = false;
+    }
   }
   for (let currentSet of Object.keys(algsets)) {
-    console.log(currentSet);
-    createSet(currentSet);
+    if (currentSet !== " " && currentSet !== "undefined") {
+      quickGenBool = true;
+      createSet(currentSet);
+      quickGenBool = false;
+    }
   }
 }
