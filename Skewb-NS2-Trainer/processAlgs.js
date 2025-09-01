@@ -1,12 +1,12 @@
 var algsInformation = {};
 let workerOutput;
 var scramblesMap = {};
-let g = "#59A14F";
+let g = "#24ab4b";
 let w = "#fafafa";
-let o = "#F28E2B";
-let y = "#ffcf3d";
-let r = "#fa2e2e";
-let b = "#4264fa";
+let o = "#ff7f26";
+let y = "#fef200";
+let r = "#ed1b24";
+let b = "#3f47cc";
 var progressBar;
 var customNumCases = 0;
 var quickGenBool = false; //this is for the quick render
@@ -62,21 +62,42 @@ const stickerPoints = {
 
 
 function processAlgSet(csvArr) {
+  const headers = csvArr[0];
+  const rows = csvArr.slice(1); //these 2 are for building the object
+
   initProgressBar();
   console.log("this is csvArr");
   console.log(csvArr);
-  customNumCases = csvArr.length;
-  console.log("numCases: " + customNumCases);
+  customNumCases = csvArr.length - 1;
   let invArr = [];
-  for(i=0; i<csvArr.length; i++){
-    let Case = csvArr[i]
-    algsInformation[i + 1] = {"a": [Case.a], "name": Case.name, "group": Case.group, "algset": Case.algset};
+  let parsedCases = [];
+  for (let i = 0; i < rows.length; i++) {
+    let row = rows[i];
+
+    // Build object from row
+    let Case = {
+      name: row[2],
+      group: row[1],
+      algset: row[0],
+      a: row.slice(3) // everything from col 4+ joined into one alg string
+    };
+
+    parsedCases.push(Case);
+
+    algsInformation[i + 1] = {
+      a: [Case.a],
+      name: Case.name,
+      group: Case.group,
+      algset: Case.algset
+    };
+
     console.log("this is algsinfo");
     console.log(algsInformation);
-    invArr.push(flipAlg(Case.a)); //gets inverse of algs
-  };
+
+    invArr.push(flipAlg(Case.a[0])); // gets inverse of algs
+  }
   console.log(invArr);
-  getScrambles(csvArr);
+  getScrambles(parsedCases);
   getColourArr(invArr); //gens colourArr + svgs + urls
 }
 
@@ -147,7 +168,7 @@ function getScrambles (csvArr){
   for (let i=0; i<csvArr.length; i++) {
     console.log(csvArr[i]);
     console.log("after replacement");
-    let temp = csvArr[i].a.replace(/(^|\s)(x2|x'|x|y2|y'|y)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
+    let temp = csvArr[i].a[0].replace(/(^|\s)(x2|x'|x|y2|y'|y)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
     console.log(temp);
     scrStr = temp + " " + startTracingProcess(temp);
     console.log("scrStr: ");

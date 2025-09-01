@@ -49,7 +49,7 @@ function main() {
         if (!file) return;
 
         Papa.parse(file, {
-            header: true,
+            header: false,
             skipEmptyLines: true,
             complete: (results) => {
                 // Pass data to your processing function'

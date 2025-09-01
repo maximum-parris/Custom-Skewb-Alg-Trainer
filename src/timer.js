@@ -28,7 +28,7 @@ function randomElement(arr) {
 }
 
 function confirmUnsel(i) {
-    if (confirm("Do you want to unselect case " + algsInformation[i]['name']  + "?")) {
+    if (confirm("Do you want to unselect case " + algsInformation[i]['name'] + "?")) {
         var index = selCases.indexOf(i);
         if (index != -1)
             selCases.splice(index, 1);
@@ -283,14 +283,14 @@ function editAlg() {
         document.getElementById('algorithmsInput').disabled = false
         document.getElementById('editAlgButton').innerText = 'check'
         return
-    } 
+    }
     else {
         document.getElementById('algorithmsInput').disabled = true
         document.getElementById('editAlgButton').innerText = 'edit'
         var caseAlgsInfo = JSON.parse(JSON.stringify(algsInformation[hintCase]));
         caseAlgsInfo["a"] = textArea.value.split('\n').filter((line) => line.length > 0)
         customAlgs[hintCase] = caseAlgsInfo
-        saveAlgs() 
+        saveAlgs()
         return
     }
 
@@ -301,17 +301,25 @@ function renderHint(i) {
     document.getElementById("boxTitle").innerHTML = `${algsInformation[i]['algset']} ${algsInformation[i]['group']} ${algsInformation[i]['name']}`;
     var longestAlgLength = 0;
     var currentAlgs = algsInformation[i]["a"]
+    console.log("this is currentAlgs");
+    console.log(currentAlgs);
+    if (typeof currentAlgs === "string") {
+        currentAlgs = currentAlgs.split(",");
+    }
+    if (currentAlgs.length === 1 && Array.isArray(currentAlgs[0])) {
+        currentAlgs = currentAlgs[0];
+    }
     if (i in customAlgs) {
         currentAlgs = customAlgs[i]["a"]
     }
     for (const alg of currentAlgs) {
         longestAlgLength = Math.max(longestAlgLength, alg.length)
     }
-    var algsStr = `<div class='colFlex' style='width: 100%'><label for='algorithmsInput'>Algorithms:</label><textarea id='algorithmsInput' disabled='true' rows='5' cols='${longestAlgLength}'>`
-    for(const alg of currentAlgs) {
-        algsStr += alg + "\n"
-    }
-    algsStr += "</textarea></div>"
+    console.log(currentAlgs.join("&#10;"));
+    let algsStr = `<div class='colFlex' style='width: 100%'>
+    <label for='algorithmsInput'>Algorithms:</label>
+    <textarea id='algorithmsInput' disabled rows='5' cols='30'>${currentAlgs.join("\n")}</textarea>
+    </div>`;
     document.getElementById('prevButton').style.opacity = i == 1 ? 0 : 1;
     document.getElementById('nextButton').style.opacity = i == Object.keys(algsInformation).length ? 0 : 1;
     document.getElementById("boxalg").innerHTML = algsStr;
@@ -333,7 +341,7 @@ function previousCase() {
 function downloadCustomAlgs() {
     const file = new File([JSON.stringify(customAlgs)], 'customAlgsExport.json', {
         type: 'application/json',
-      })
+    })
     const link = document.createElement('a')
     const url = URL.createObjectURL(file)
 
@@ -352,10 +360,10 @@ function uploadCustomAlgs() {
     if (files.length != 1) {
         return false;
     }
-    
+
     var fr = new FileReader();
-    
-    fr.onload = function(e) { 
+
+    fr.onload = function (e) {
         try {
             var result = JSON.parse(e.target.result)
             console.log(result)
@@ -364,7 +372,7 @@ function uploadCustomAlgs() {
         } catch (e) {
             console.error(e);
         }
-        
+
     }
 
     fr.readAsText(files.item(0));
@@ -398,7 +406,7 @@ function displayStats() {
         return;
     }
 
-        // case-by-case
+    // case-by-case
     var resultsByCase = {}; // [57: [...], 12: [...], ...];
     for (var i = 0; i < len; i++) {
         var currentCase = window.timesArray[i]["case"];
@@ -408,7 +416,7 @@ function displayStats() {
     }
 
     var keys = Object.keys(resultsByCase);
-    keys.sort((n1,n2) => n1 - n2);
+    keys.sort((n1, n2) => n1 - n2);
 
     var s = "";
     // allocate them inside times span
@@ -430,7 +438,7 @@ function displayStats() {
         s += ` <span class='caseNameStats' onclick=(showCaseTimeDetails(${case_}))>(#${resultsByCase[case_].length}, ⌀${msToHumanReadable(meanForCase)})</span></div>`;
     }
     el.innerHTML = s;
-    
+
     document.getElementById("infoHeader").innerText = (len == 0 ? '' : len + ' ');
     document.getElementById('numCases').innerText = keys.length;
 }

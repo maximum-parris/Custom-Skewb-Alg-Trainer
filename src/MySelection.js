@@ -437,10 +437,15 @@ async function exportXLSX() {
             for (let caseID of algsGroups[group]) {
                 let caseImage = document.getElementById("itemTd" + caseID).getElementsByTagName('img')[0].src;
                 let caseName = algsInformation[caseID].name;
-                let caseAlg = algsInformation[caseID].a[0];
+                let caseAlgs = algsInformation[caseID].a[0];
 
                 setSheet.getCell(groupCount * 7 + 2, caseCount).value = caseName;
-                setSheet.getCell(groupCount * 7 + 3, caseCount).value = caseAlg;
+                for (i = 0; i < caseAlgs.length; i++) {
+                    let caseAlg = caseAlgs[i];
+                    if (caseAlg !== "" ) {
+                        setSheet.getCell(groupCount * 7 + 3 + i, caseCount).value = caseAlg;
+                    }
+                }
 
                 const response = await fetch(caseImage);
                 const blob = await response.blob();
@@ -521,9 +526,9 @@ async function svgToPngBase64(svgString, width = 156, height = 93.675) {
 }
 
 function save () {
-    var csv = "name, a, algset, group\n";
+    var csv = "algset, group, name, a\n";
     Object.keys(algsInformation).forEach((num) => {  
-        csv += algsInformation[num].name + ", " + algsInformation[num].a.join(" ") + ", " + algsInformation[num].algset + ", " + algsInformation[num].group + "\n";
+        csv += algsInformation[num].algset + ", " + algsInformation[num].group + ", " + algsInformation[num].name + ", " + algsInformation[num].a.join(" ") + "\n";
     });  
 
     console.log(csv);
