@@ -20,8 +20,8 @@ var skewbStickers = [
   ["f1", "f2", "f3", "f4", "f5"],
   ["r1", "r2", "r3", "r4", "r5"],
   ["b1", "b2", "b3", "b4", "b5"]
-//  ["d1", "d2", "d3", "d4", "d5"] 6 face currently not supported
-  ];
+  //  ["d1", "d2", "d3", "d4", "d5"] 6 face currently not supported
+];
 let faces = ["u", "l", "f", "r", "b"]; //same here
 const stickerPoints = {
   // U face
@@ -30,28 +30,28 @@ const stickerPoints = {
   u3: '61.25 10.62 50.00 5.00 38.75 10.62',
   u4: '61.25 21.87 72.50 16.25 61.25 10.62',
   u5: '38.75 21.87 50.00 27.50 61.25 21.87',
-  
+
   // L face
   l1: '38.75 21.87 50.00 41.28 38.75 49.43 27.50 30.03',
   l2: '27.50 16.25 38.75 21.87 27.50 30.03',
   l3: '38.75 21.87 50.00 27.50 50.00 41.28',
   l4: '50.00 41.28 38.75 49.43 50.00 55.06',
   l5: '27.50 30.03 27.50 43.81 38.75 49.43',
-  
+
   // F face
   f1: '61.25 21.87 72.50 30.03 61.25 49.43 50.00 41.28',
   f2: '50.00 27.50 61.25 21.87 50.00 41.28',
   f3: '61.25 21.87 72.50 16.25 72.50 30.03',
   f4: '72.50 30.03 61.25 49.43 72.50 43.81',
   f5: '50.00 41.28 50.00 55.06 61.25 49.43',
-  
+
   // R face
   r1: '83.75 10.62 95.00 18.78 83.75 38.18 72.50 30.03',
   r2: '72.50 16.25 83.75 10.62 72.50 30.03',
   r3: '83.75 10.62 95.00 5.00 95.00 18.78',
   r4: '95.00 18.78 83.75 38.18 95.00 32.56',
   r5: '72.50 30.03 83.75 38.18 72.50 43.81',
-  
+
   // B face
   b1: '16.25 10.62 27.50 30.03 16.25 38.18 5.00 18.78',
   b2: '5.00 5.00 16.25 10.62 5.00 18.78',
@@ -63,49 +63,65 @@ const stickerPoints = {
 
 function processAlgSet(csvArr) {
   const headers = csvArr[0];
-  const rows = csvArr.slice(1); //these 2 are for building the object
+  const rows = csvArr.slice(1); // skip header row
 
   initProgressBar();
-  console.log("this is csvArr");
-  console.log(csvArr);
-  customNumCases = csvArr.length - 1;
+  console.log("📄 CSV Array:", csvArr);
+
+  customNumCases = rows.length;
   let invArr = [];
   let parsedCases = [];
+  let enteredAlgs = [];
+
   for (let i = 0; i < rows.length; i++) {
     let row = rows[i];
 
-    // Build object from row
+    // grab all alg cells from col 4 onwards, strip empties
+    let algCells = row.slice(3).filter(cell => cell && cell.trim() !== "");
+
+    if (algCells.length === 0) {
+      console.error(`No algorithm found in row ${i + 1}`, row);
+      continue; // skip bad rows
+    }
+
     let Case = {
       name: row[2],
       group: row[1],
       algset: row[0],
-      a: row.slice(3) // everything from col 4+ joined into one alg string
+      a: algCells
     };
 
-    parsedCases.push(Case);
+    let cleanAlg = removeZrot(Case.a[0]);
+
+    if (!enteredAlgs.includes(cleanAlg)) {
+      enteredAlgs.push(cleanAlg);
+      parsedCases.push(Case);
+    } else {
+      alert("case " + Case.name + " is repeated, please fix");
+    }
 
     algsInformation[i + 1] = {
-      a: [Case.a],
+      a: [Case.a], // only store the first alg for now
       name: Case.name,
       group: Case.group,
       algset: Case.algset
     };
 
-    console.log("this is algsinfo");
-    console.log(algsInformation);
-
-    invArr.push(flipAlg(Case.a[0])); // gets inverse of algs
+    invArr.push(flipAlg(Case.a[0])); // inverse
   }
-  console.log(invArr);
+
+  console.log("Parsed cases:", parsedCases);
+  console.log("Algs info:", algsInformation);
+
   getScrambles(parsedCases);
   getColourArr(invArr); //gens colourArr + svgs + urls
 }
 
-function updateProgressBar(scrGenned){
+function updateProgressBar(scrGenned) {
   progressBar.innerText = "Progress: " + scrGenned + "/" + customNumCases;
-} 
+}
 
-function initProgressBar () {
+function initProgressBar() {
   var fileInput = document.getElementById("csvUploader");
   const container = document.createElement('div');
   container.className = 'input-box';
@@ -114,7 +130,7 @@ function initProgressBar () {
   progressBar.id = 'progress';
   progressBar.style.margin = '20px';
   progressBar.style.display = 'block';
-  if (document.getElementById("startingContainer")){
+  if (document.getElementById("startingContainer")) {
     document.getElementById("startingContainer").remove();
   }
   container.appendChild(fileInput);
@@ -122,68 +138,77 @@ function initProgressBar () {
   document.body.insertBefore(container, document.body.firstChild);
 }
 
-function flipAlg(alg){
-    let input = alg.trim();
+function flipAlg(alg) {
+  let input = alg.trim();
 
-    if (!isValidAlg(input)) {
-      alert("Invalid algorithm, please correct alg" + alg);
-      return null;
-    }
-
-    let flipped_alg = input.split(/\s+/).reverse();
-    return(primeFlipper(flipped_alg).trim());
-    }
-
-    function isValidAlg(algString) {
-        const validMoves = /^[rRbBlLfFxyz]('?|2)?$/;
-        const moves = algString.trim().split(/\s+/);
-
-        for (let move of moves) {
-          if (!validMoves.test(move)) {
-            return false;
-          }
-        }
-        return true;
-    }
-
-  function primeFlipper(flipped_string) {
-    for (let i = 0; i < flipped_string.length; i++) {
-      let move = flipped_string[i];
-      if (move.length > 1) {
-        if (move[1] !== "2") {
-          flipped_string[i] = move[0];
-        }
-      } else {
-        flipped_string[i] = move + "'";
-      }
-    }
-    return flipped_string.join(" ");
+  if (!isValidAlg(input)) {
+    alert("Invalid algorithm, please correct alg" + alg);
+    return null;
   }
 
+  let flipped_alg = input.split(/\s+/).reverse();
+  return (primeFlipper(flipped_alg).trim());
+}
 
-function getScrambles (csvArr){
+function isValidAlg(algString) {
+  const validMoves = /^[rRbBlLfFxyz]('?|2)?$/;
+  const moves = algString.trim().split(/\s+/);
+
+  for (let move of moves) {
+    if (!validMoves.test(move)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function primeFlipper(flipped_string) {
+  for (let i = 0; i < flipped_string.length; i++) {
+    let move = flipped_string[i];
+    if (move.length > 1) {
+      if (move[1] !== "2") {
+        flipped_string[i] = move[0];
+      }
+    } else {
+      flipped_string[i] = move + "'";
+    }
+  }
+  return flipped_string.join(" ");
+}
+
+
+function getScrambles(casesArr) {
   let scrambleList = [];
   work = new Worker("worker.js");
+
   let solvestring = "[";
-  for (let i=0; i<csvArr.length; i++) {
-    console.log(csvArr[i]);
-    console.log("after replacement");
-    let temp = csvArr[i].a[0].replace(/(^|\s)(x2|x'|x|y2|y'|y)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim(); //removes x and y rotations withing alg     
-    console.log(temp);
-    scrStr = temp + " " + startTracingProcess(temp);
-    console.log("scrStr: ");
-    console.log(scrStr);
-    if (i != csvArr.length - 1) {
-    solvestring += scrStr + ", ";
-    } else {
-      solvestring += scrStr;
+  for (let i = 0; i < casesArr.length; i++) {
+    let alg = casesArr[i].a[0];
+
+    if (!alg || alg.trim() === "") {
+      console.error(`Missing algorithm at row ${i}:`, casesArr[i]);
+      continue; // skip this row instead of crashing
     }
+
+    // remove x / y rotations
+    let temp = alg
+      .replace(/(^|\s)(x2|x'|x|y2|y'|y)(?=\s|$)/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // add tracing
+    let scrStr = temp + " " + startTracingProcess(temp);
+
+    // append to string
+    solvestring += scrStr + (i !== casesArr.length - 1 ? ", " : "");
   }
   solvestring += "]";
-  console.log("getting scrambles " + solvestring);
 
-  let subgroupData = [{subgroup: 'r l b B', prune: '6', search: '5'}];
-  let sortData = [{type: 'priority', pieces: ''}];
+  console.log(`Getting ${casesArr.length} scrambles`);
+  console.log(solvestring);
+
+  let subgroupData = [{ subgroup: 'r l b B', prune: '6', search: '5' }];
+  let sortData = [{ type: 'priority', pieces: '' }];
   /*console.log({puzzle: "l: (UFL-1 DFR-1 DBL-1) (DLF+1) (L F D)\nL: (URF-1 DLF-1 ULB-1) (UFL+1) (U F L)\nr: (DFR-1 UBR-1 DBL-1) (DRB+1) (R B D)\nR: (URF-1 ULB-1 DRB-1) (UBR+1) (R U B)\nb: (ULB-1 DLF-1 DRB-1) (DBL+1) (L D B)\nB: (UBR-1 UFL-1 DBL-1) (ULB+1) (U L B)\nF: (UFL-1 UBR-1 DFR-1) (URF+1) (F U R) \nf: (URF-1 DRB-1 DLF-1) (DFR+1) (F R D)\nS: (URF-1) (UFL+1) (ULB+1) (UBR-1) (R U) (F B)\nH: (URF+1) (UFL-1) (ULB-1) (UBR+1) (R U) (F B)\ns: (UBR-1) (ULB+1) (DRB-1) (DBL+1) (U D) (R B)\nh: (UBR+1) (ULB-1) (DRB+1) (DBL-1) (U D) (R B)      \nx: (F U B D) (URF+1 UBR-1 DRB+1 DFR-1) (UFL-1 ULB+1 DBL-1 DLF+1)\ny: (F L B R) (URF UFL ULB UBR) (DFR DLF DBL DRB)\nz: (U R D L) (URF-1 DFR+1 DLF-1 UFL+1) (UBR+1 DRB-1 DBL+1 ULB-1)\nvUperm: (U B D)\nhUperm: (U R D)", 
                   ignore: "",
                   solve: solvestring, //scram area 
@@ -195,65 +220,70 @@ function getScrambles (csvArr){
                   rankesq: "z_:30",
                   showPost: false}); */
 
-  work.postMessage({puzzle: "l: (UFL-1 DFR-1 DBL-1) (DLF+1) (L F D)\nL: (URF-1 DLF-1 ULB-1) (UFL+1) (U F L)\nr: (DFR-1 UBR-1 DBL-1) (DRB+1) (R B D)\nR: (URF-1 ULB-1 DRB-1) (UBR+1) (R U B)\nb: (ULB-1 DLF-1 DRB-1) (DBL+1) (L D B)\nB: (UBR-1 UFL-1 DBL-1) (ULB+1) (U L B)\nF: (UFL-1 UBR-1 DFR-1) (URF+1) (F U R) \nf: (URF-1 DRB-1 DLF-1) (DFR+1) (F R D)\nS: (URF-1) (UFL+1) (ULB+1) (UBR-1) (R U) (F B)\nH: (URF+1) (UFL-1) (ULB-1) (UBR+1) (R U) (F B)\ns: (UBR-1) (ULB+1) (DRB-1) (DBL+1) (U D) (R B)\nh: (UBR+1) (ULB-1) (DRB+1) (DBL-1) (U D) (R B)      \nx: (F U B D) (URF+1 UBR-1 DRB+1 DFR-1) (UFL-1 ULB+1 DBL-1 DLF+1)\ny: (F L B R) (URF UFL ULB UBR) (DFR DLF DBL DRB)\nz: (U R D L) (URF-1 DFR+1 DLF-1 UFL+1) (UBR+1 DRB-1 DBL+1 ULB-1)\nvUperm: (U B D)\nhUperm: (U R D)", 
-                  ignore: "",
-                  solve: solvestring, //scram area 
-                  preAdjust: "",
-                  postAdjust: "", //no pre/post-adjust because of the fcn rotation grabber function
-                  subgroups: subgroupData,
-                  sorting: sortData,
-                  esq: "",
-                  rankesq: "",
-                  showPost: false});
+  work.postMessage({
+    puzzle: "l: (UFL-1 DFR-1 DBL-1) (DLF+1) (L F D)\nL: (URF-1 DLF-1 ULB-1) (UFL+1) (U F L)\nr: (DFR-1 UBR-1 DBL-1) (DRB+1) (R B D)\nR: (URF-1 ULB-1 DRB-1) (UBR+1) (R U B)\nb: (ULB-1 DLF-1 DRB-1) (DBL+1) (L D B)\nB: (UBR-1 UFL-1 DBL-1) (ULB+1) (U L B)\nF: (UFL-1 UBR-1 DFR-1) (URF+1) (F U R) \nf: (URF-1 DRB-1 DLF-1) (DFR+1) (F R D)\nS: (URF-1) (UFL+1) (ULB+1) (UBR-1) (R U) (F B)\nH: (URF+1) (UFL-1) (ULB-1) (UBR+1) (R U) (F B)\ns: (UBR-1) (ULB+1) (DRB-1) (DBL+1) (U D) (R B)\nh: (UBR+1) (ULB-1) (DRB+1) (DBL-1) (U D) (R B)      \nx: (F U B D) (URF+1 UBR-1 DRB+1 DFR-1) (UFL-1 ULB+1 DBL-1 DLF+1)\ny: (F L B R) (URF UFL ULB UBR) (DFR DLF DBL DRB)\nz: (U R D L) (URF-1 DFR+1 DLF-1 UFL+1) (UBR+1 DRB-1 DBL+1 ULB-1)\nvUperm: (U B D)\nhUperm: (U R D)",
+    ignore: "",
+    solve: solvestring, //scram area 
+    preAdjust: "",
+    postAdjust: "", //no pre/post-adjust because of the fcn rotation grabber function
+    subgroups: subgroupData,
+    sorting: sortData,
+    esq: "",
+    rankesq: "",
+    showPost: false
+  });
 
 
-  work.onmessage = function(event) {
-               // console.log("got event " + event.data.type);
-                if (event.data.type === "stop") {
-                  progressBar.innerText += " Done!"
-                  console.log("algs done");
-                  initSelection();
-                  checkPostRender();
-                  //renderSelection();
-                  work.terminate();
-                  return;
-                } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.
-                  workerOutput = event.data.value;
-                  scrGenned++;
-                  updateProgressBar(scrGenned);
-                  console.log("worker output: ");
-                  console.log(workerOutput);
-                  createScramblesMap(workerOutput);
-                } else if (event.data.type === "depthUpdate") {
-                    
-                } else if (event.data.type === "solution") {
-                 /* if(numSolutions <= 20){
-                    let solution = event.data.value;
-                    //console.log(solution);
-                    //console.log(typeof solution);
-                    if (!solution.includes("z")) {
-                      numSolutions++;
-                      scrambleList.push(solution);
-                    } else {
-                      console.log("this scramble has a z")
-                    }
-                  } */
-                } else if (event.data.type === "set-depth") {
-                    depth = event.data.value;
-                } else if (event.data.type === "next-state") {
-                   /* if (event.data.value.index > 1) {
-                      numSolutions = 0;
-                    }
-                    numSolutions = 0;
-                    caseNum = event.data.value.num; */
-                } else if (event.data.type === "num-states") {
-                  //  numCases = event.data.value;
-                } else if (event.data.type === "moveWeights") {
-                    moveWeights = event.data.value;
-                } else if (event.data.type === "debug") {
-                    debugVars.push(event.data.value);
-                }
-            }
+  work.onmessage = function (event) {
+    // console.log("got event " + event.data.type);
+    if (event.data.type === "stop") {
+      progressBar.innerText += " Done!"
+      console.log("algs done");
+      initSelection();
+      checkPostRender();
+      //renderSelection();
+      work.terminate();
+      return;
+    } else if (event.data.type === "scrambles") { //added, called when 20 scrambles are ready.
+      workerOutput = event.data.value;
+      scrGenned++;
+      updateProgressBar(scrGenned);
+      console.log("worker output: ");
+      console.log(workerOutput);
+      createScramblesMap(workerOutput);
+    } else if (event.data.type === "error") {
+      console.log("alg " + csvArr[scrGenned].name + " " + csvArr[scrGenned].a[0] + " is entered incorrectly, please check formatting");
+      alert("alg " + csvArr[scrGenned].name + " " + csvArr[scrGenned].a[0] + " is entered incorrectly, please check formatting");
+    } else if (event.data.type === "depthUpdate") {
+
+    } else if (event.data.type === "solution") {
+      /* if(numSolutions <= 20){
+         let solution = event.data.value;
+         //console.log(solution);
+         //console.log(typeof solution);
+         if (!solution.includes("z")) {
+           numSolutions++;
+           scrambleList.push(solution);
+         } else {
+           console.log("this scramble has a z")
+         }
+       } */
+    } else if (event.data.type === "set-depth") {
+      depth = event.data.value;
+    } else if (event.data.type === "next-state") {
+      /* if (event.data.value.index > 1) {
+         numSolutions = 0;
+       }
+       numSolutions = 0;
+       caseNum = event.data.value.num; */
+    } else if (event.data.type === "num-states") {
+      //  numCases = event.data.value;
+    } else if (event.data.type === "moveWeights") {
+      moveWeights = event.data.value;
+    } else if (event.data.type === "debug") {
+      debugVars.push(event.data.value);
+    }
+  }
   /*algsInformation[i] = {"a": scrambleList};
   console.log("alg info scr")
   console.log(algsInformation);
@@ -263,30 +293,29 @@ function getScrambles (csvArr){
 
 //input -> ["scr1", "scr2"...]
 let numScrambleMapEntries = 0;
-function createScramblesMap (input) {
+function createScramblesMap(input) {
   //console.log(numScrambleMapEntries);
   let FPNscr = [];
   numScrambleMapEntries++;
   input.forEach(scr => {
-    scr = scr.replace(/[rlbB]/g, c => ({r:'R',l:'L',b:'B',B:'U'})[c]); //goes from rlbB gen to RLUB gen
+    scr = scr.replace(/[rlbB]/g, c => ({ r: 'R', l: 'L', b: 'B', B: 'U' })[c]); //goes from rlbB gen to RLUB gen
     FPNscr.push(scr);
   })
   scramblesMap[numScrambleMapEntries] = FPNscr;
   //console.log(scramblesMap);
 }
 
-function getColourArr (invArr, k) {
+function getColourArr(invArr, k) {
   let finColourArr; //so doMove doesn't run a billion times;
   for (k = 0; k < invArr.length; k++) {
     let invAlg = invArr[k];
-    console.log(invAlg);
     colourArr = [
-    { u1: g, u2: g, u3: g, u4: g, u5: g },
-    { l1: w, l2: w, l3: w, l4: w, l5: w },
-    { f1: o, f2: o, f3: o, f4: o, f5: o },
-    { r1: y, r2: y, r3: y, r4: y, r5: y },
-    { b1: r, b2: r, b3: r, b4: r, b5: r },
-    { d1: b, d2: b, d3: b, d4: b, d5: b }
+      { u1: g, u2: g, u3: g, u4: g, u5: g },
+      { l1: w, l2: w, l3: w, l4: w, l5: w },
+      { f1: o, f2: o, f3: o, f4: o, f5: o },
+      { r1: y, r2: y, r3: y, r4: y, r5: y },
+      { b1: r, b2: r, b3: r, b4: r, b5: r },
+      { d1: b, d2: b, d3: b, d4: b, d5: b }
     ];
     invAlg = invAlg.replace(/[’‘]/g, "'");
     let algByMove = invAlg.split(" ");
@@ -297,7 +326,7 @@ function getColourArr (invArr, k) {
     });
     generateSVG(finColourArr, k); //k is the Nth case
   }
-  
+
 }
 
 function getMultiplier(move) {
@@ -353,7 +382,7 @@ function doMove(move, multiplier) {
       colourArr[2].f4 = colourArr[5].d3;
       colourArr[5].d3 = colourArr[3].r5;
       colourArr[3].r5 = temp;
-      
+
     } else if (turn == "R") {
       temp = colourArr[2].f2;
       colourArr[2].f2 = colourArr[3].r5;
@@ -559,11 +588,10 @@ function doMove(move, multiplier) {
       colourArr[3].r2 = temp;
     }
   }
-  console.log(colourArr);
   return colourArr;
 }
 
-function generateSVG (colourArr, k) {  
+function generateSVG(colourArr, k) {
   let svg = baseSvgCode;
   for (let j = 0; j < faces.length; j++) { //for the face "r"
     for (let i = 1; i <= 5; i++) { //for the specific sticked "1"
@@ -575,11 +603,9 @@ function generateSVG (colourArr, k) {
     }
   }
   svg += "</svg>";
-  blob = new Blob([svg], {type: 'image/svg+xml'});
+  blob = new Blob([svg], { type: 'image/svg+xml' });
   url = URL.createObjectURL(blob);
   blobUrls[k + 1] = url;
-  console.log(blobUrls);
-  console.log(algsInformation);
   outputAlgs(k + 1);
 }
 /*
@@ -599,22 +625,20 @@ function getKeysByGroup(obj, groupName) {
 } */
 
 function checkPostRender() {
-  console.log("running Post Render");
   let uniqueGroupNames = [];
   let uniqueSetNames = [];
   for (m = 1; m <= Object.keys(algsInformation).length; m++) {
-    console.log("in for loop");
-    
-      let currentSetName = algsInformation[m].algset;
-      
-      if (!algsets[currentSetName] && currentSetName !== "") {
-        algsets[currentSetName] = []; //creates group within algset
-      } 
-      if (algsets[currentSetName] !== undefined) {
-        if (!algsets[currentSetName].includes(algsInformation[m].group) && algsInformation[m].group !== "") {
-          algsets[currentSetName].push(algsInformation[m].group); //pushes group into set in algsets
-        }
+
+    let currentSetName = algsInformation[m].algset;
+
+    if (!algsets[currentSetName] && currentSetName !== "") {
+      algsets[currentSetName] = []; //creates group within algset
+    }
+    if (algsets[currentSetName] !== undefined) {
+      if (!algsets[currentSetName].includes(algsInformation[m].group) && algsInformation[m].group !== "") {
+        algsets[currentSetName].push(algsInformation[m].group); //pushes group into set in algsets
       }
+    }
     if (!uniqueSetNames.includes(algsInformation[m].algset) && algsInformation[m].algset !== "") {
       uniqueSetNames.push(currentSetName);
     }
@@ -622,7 +646,7 @@ function checkPostRender() {
       uniqueGroupNames.push(algsInformation[m].group);
       algsGroups[algsInformation[m].group] = []; //to create the empty arrays
     }
-    if (algsInformation[m].group !== ""){
+    if (algsInformation[m].group !== "") {
       let currentGroupName = algsInformation[m].group;
       algsGroups[currentGroupName].push(m);
     }
@@ -647,4 +671,21 @@ function renderGroupsAndSets() {
       quickGenBool = false;
     }
   }
+}
+
+function removeZrot(input) {
+  let rotations = 0;
+  let res;
+  input.split(" ").forEach(move => {
+    if (move.includes("z")) {
+      rotations += move.charAt(1) === "'" ? 3 : move.charAt(1) === "2" ? 2 : 1;
+    } else {
+      for (let i = 0; i < rotations % 4; i++) {
+        move = move.replace(/[rRbB]/g, c => ({ r: 'R', R: 'B', B: 'b', b: 'r' }[c]));
+      }
+      res += move + " ";
+    }
+  });
+  console.log("removed z " + res)
+  return res;
 }

@@ -1,6 +1,6 @@
 self.onmessage = function (msg) {
     console.log("running worker.js")
-    if (msg.data.puzzle) {main(msg.data)}
+    if (msg.data.puzzle) { main(msg.data) }
 };
 
 /**
@@ -16,7 +16,7 @@ function main(input) {
         postMessage({ value: "Colon notation for indicating adjust moves is deprecated.", type: "stop" });
     }
     let [fullPuzzle, batchStates, subPuzzles] = setPuzzles(scramble, input.puzzle, input.ignore, input.subgroups, input.preAdjust, input.postAdjust, input.sorting, input.esq);
-    postMessage({value: parseESQ(input.rankesq), type: "moveWeights"}); 
+    postMessage({ value: parseESQ(input.rankesq), type: "moveWeights" });
     let [modifiers, startNum] = parseModifiers(scramble);
     let caseNum = 1;
     let solutionIndex = 1;
@@ -64,21 +64,21 @@ function setPuzzles(scramble, puzzleDef, ignore, subgroups, adjust, postAdjust, 
     function parseMove(data) {
         let cycleList = [];
         let openParenSplit = data.split("(");
-        for (let i=1; i<openParenSplit.length; i++) {
+        for (let i = 1; i < openParenSplit.length; i++) {
             let cycle = [];
             let cycleStr = openParenSplit[i].split(")")[0];
             let pieces = cycleStr.split(" ");
-            for (let j=0; j<pieces.length; j++) {
+            for (let j = 0; j < pieces.length; j++) {
                 let pieceData = pieces[j];
                 if (pieceData != "") {
-                    let suffixLoc = pieceData.indexOf('+')==-1?pieceData.indexOf('-'):pieceData.indexOf('+');
-                    let piece = suffixLoc==-1 ? pieceData : pieceData.slice(0, suffixLoc);
-                    let twist = suffixLoc==-1 ? 0 : parseInt(pieceData.slice(suffixLoc));
+                    let suffixLoc = pieceData.indexOf('+') == -1 ? pieceData.indexOf('-') : pieceData.indexOf('+');
+                    let piece = suffixLoc == -1 ? pieceData : pieceData.slice(0, suffixLoc);
+                    let twist = suffixLoc == -1 ? 0 : parseInt(pieceData.slice(suffixLoc));
                     let pieceIndex = pieceList.indexOf(piece);
                     if (pieceIndex == -1) {
                         pieceList.push(piece);
-                        pieceIndex = pieceList.length-1;
-                        cubeOri.push(Math.max(1,piece.replace(/[^A-Z]/g, "").length)); // Number of orientations is number of capital letters in piece name, but 1 minimum
+                        pieceIndex = pieceList.length - 1;
+                        cubeOri.push(Math.max(1, piece.replace(/[^A-Z]/g, "").length)); // Number of orientations is number of capital letters in piece name, but 1 minimum
                     }
                     cycle.push([pieceIndex, twist]);
                 }
@@ -89,18 +89,18 @@ function setPuzzles(scramble, puzzleDef, ignore, subgroups, adjust, postAdjust, 
     }
 
     function mod(a, n) { // works with negative a unlike % operator
-        return a - (n * Math.floor(a/n));
+        return a - (n * Math.floor(a / n));
     }
-    
-    for (let ln=0; ln<moveLines.length; ln++) {
+
+    for (let ln = 0; ln < moveLines.length; ln++) {
         let line = moveLines[ln].split("//")[0];
         if (line.includes(":")) {
             let cycleStr = moveLines[ln].split(":");
             let moveName = cycleStr[0];
             if (!/^[A-Za-z0-9]*$/.test(moveName)) { // if moveName contains anything that isn't a letter or number
-                postMessage({value: "'" + moveName + "' is not a valid move name, because move names must only contain alphanumeric characters.", type: "stop"})
-            } else if (moveName[moveName.length-1] >= '0' && moveName[moveName.length-1] <= '9') { // if moveName ends in a number
-                postMessage({value: "'" + moveName + "' is not a valid move name, because move names cannot end in a number.", type: "stop"})
+                postMessage({ value: "'" + moveName + "' is not a valid move name, because move names must only contain alphanumeric characters.", type: "stop" })
+            } else if (moveName[moveName.length - 1] >= '0' && moveName[moveName.length - 1] <= '9') { // if moveName ends in a number
+                postMessage({ value: "'" + moveName + "' is not a valid move name, because move names cannot end in a number.", type: "stop" })
             }
             clockwiseMoveStr.push(moveName);
             let cycleList = parseMove(cycleStr[1]);
@@ -108,19 +108,19 @@ function setPuzzles(scramble, puzzleDef, ignore, subgroups, adjust, postAdjust, 
         }
     }
 
-    let oriMult = 2**Math.ceil(Math.log2(pieceList.length));
+    let oriMult = 2 ** Math.ceil(Math.log2(pieceList.length));
 
-    for (let m=0; m<moveDataList.length; m++) {
+    for (let m = 0; m < moveDataList.length; m++) {
         let cycleList = moveDataList[m];
         let move = [];
-        for (let i=0; i<pieceList.length; i++) {move.push(i)}
-        for (let c=0; c<cycleList.length; c++) {
+        for (let i = 0; i < pieceList.length; i++) { move.push(i) }
+        for (let c = 0; c < cycleList.length; c++) {
             let cycle = cycleList[c];
-            for (let i=0; i<cycle.length-1; i++) {
-                move[cycle[i+1][0]] = cycle[i][0]+oriMult*mod(cycle[i][1],cubeOri[cycle[i][0]]);
+            for (let i = 0; i < cycle.length - 1; i++) {
+                move[cycle[i + 1][0]] = cycle[i][0] + oriMult * mod(cycle[i][1], cubeOri[cycle[i][0]]);
             }
-            if (cycle.length==1 || (cycle[0][0] != cycle[cycle.length-1][0])) {
-                move[cycle[0][0]] = cycle[cycle.length-1][0]+oriMult*mod(cycle[cycle.length-1][1],cubeOri[cycle[cycle.length-1][0]]);
+            if (cycle.length == 1 || (cycle[0][0] != cycle[cycle.length - 1][0])) {
+                move[cycle[0][0]] = cycle[cycle.length - 1][0] + oriMult * mod(cycle[cycle.length - 1][1], cubeOri[cycle[cycle.length - 1][0]]);
             }
         }
         moveList.push(move);
@@ -129,24 +129,24 @@ function setPuzzles(scramble, puzzleDef, ignore, subgroups, adjust, postAdjust, 
     // Deal with equivalences
     let splitEquivalences = ignore.split('{');
     let solvedState = [];
-    for (let i=0; i<pieceList.length; i++) {solvedState[i] = i}
-    for (let i=1; i<splitEquivalences.length; i++) {
+    for (let i = 0; i < pieceList.length; i++) { solvedState[i] = i }
+    for (let i = 1; i < splitEquivalences.length; i++) {
         if (!splitEquivalences[i].includes("}")) {
-            postMessage({value: 'Missing "}" in Unique Orientations and Equivalences', type: "stop"})
+            postMessage({ value: 'Missing "}" in Unique Orientations and Equivalences', type: "stop" })
         }
         let equivSet = splitEquivalences[i].split("}")[0];
         let equivPieces = equivSet.split(" ").filter(x => x !== "");
         let equivNum = pieceList.indexOf(equivPieces[0]);
         if (equivNum == -1) {
-            postMessage({value: '"' + equivPieces[0] + '" is not a piece. (error in Unique Orientations & Equivalences)', type: "stop"})
+            postMessage({ value: '"' + equivPieces[0] + '" is not a piece. (error in Unique Orientations & Equivalences)', type: "stop" })
         }
-        for (let j=1; j<equivPieces.length; j++) {
+        for (let j = 1; j < equivPieces.length; j++) {
             let equivWithNum = pieceList.indexOf(equivPieces[j]);
             if (equivWithNum == -1) {
-                postMessage({value: '"' + equivPieces[j] + '" is not a piece. (error in Unique Orientations & Equivalences)', type: "stop"})
+                postMessage({ value: '"' + equivPieces[j] + '" is not a piece. (error in Unique Orientations & Equivalences)', type: "stop" })
             }
             if (cubeOri[equivNum] != cubeOri[equivWithNum]) {
-                postMessage({value: '"' + equivPieces[j] + '" and "' + equivPieces[0] + '" cannot be in the same equivalence set because they are different types of pieces.', type: "stop"})
+                postMessage({ value: '"' + equivPieces[j] + '" and "' + equivPieces[0] + '" cannot be in the same equivalence set because they are different types of pieces.', type: "stop" })
             }
             solvedState[equivWithNum] = equivNum;
         }
@@ -160,10 +160,10 @@ function setPuzzles(scramble, puzzleDef, ignore, subgroups, adjust, postAdjust, 
     let fullPuzzleDupe = new Puzzle(cubeOri.slice(), moveList.slice(), clockwiseMoveStr.slice(), solvedState.slice(), moveWeights);
     checkMoveGroup(fullPuzzle, adjust, "pre-adjust");
     checkMoveGroup(fullPuzzle, postAdjust, "post-adjust");
-    for (let sub of subgroups) {checkMoveGroup(fullPuzzle, sub.subgroup, "a subgroup")}
+    for (let sub of subgroups) { checkMoveGroup(fullPuzzle, sub.subgroup, "a subgroup") }
     let adjustList = (adjust == "") ? [] : splitSubgroupStr(adjust);
-    for (let i=0; i<adjustList.length; i++) {
-        for (let j=0; j<i; j++) {
+    for (let i = 0; i < adjustList.length; i++) {
+        for (let j = 0; j < i; j++) {
             if (!fullPuzzle.commutes(fullPuzzle.moveStr.indexOf(adjustList[i]), fullPuzzle.moveStr.indexOf(adjustList[j]))) {
                 // postMessage({value: '"' + adjust + '" is an invalid pre-adjust because all moves in pre-adjust must commute.', type: "stop"})
             }
@@ -178,19 +178,19 @@ function setPuzzles(scramble, puzzleDef, ignore, subgroups, adjust, postAdjust, 
     let [modifiers, startNum] = parseModifiers(scramble)
     for (let stateStr of batchStates) {
         let state = fullPuzzleDupe.execute(fullPuzzleDupe.solved, fullPuzzleDupe.moveStrToList(stateStr));
-        if(!(arraysEqual(fullPuzzleDupe.solved, state))) {
+        if (!(arraysEqual(fullPuzzleDupe.solved, state))) {
             if (solutionIndex >= startNum || modifiers.has(solutionIndex)) {
                 numStates++;
             }
             solutionIndex++;
         }
     }
-    postMessage({value: numStates, type: "num-states"})
+    postMessage({ value: numStates, type: "num-states" })
 
     // deal with subpuzzles
     let subPuzzles = [];
     for (let sub of subgroups) {
-        subPuzzles.push({puzzle: getSubPuzzle(pieceList, fullPuzzle, ignore, sub.subgroup, sub.prune, adjustList), search: sub.search});
+        subPuzzles.push({ puzzle: getSubPuzzle(pieceList, fullPuzzle, ignore, sub.subgroup, sub.prune, adjustList), search: sub.search });
     }
 
     initCubeOri(fullPuzzle, pieceList, ignore);
@@ -214,27 +214,29 @@ function parseESQ(esq) {
 
 function initCubeOri(pzl, pieceList, ignore) {
     let lines = ignore.split("\n");
-    for (let i=0; i<lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         if (line.includes(":")) {
             let numOri = parseInt(line.split(":")[0], 10);
             if (numOri !== numOri) { // checking if numOri is NaN
-                postMessage({value: '"' + line.split(":")[0] + ':" is not a valid Unique Orientations header.', type: "stop"})
+                postMessage({ value: '"' + line.split(":")[0] + ':" is not a valid Unique Orientations header.', type: "stop" })
             }
             if (numOri <= 0) {
-                postMessage({value: '"' + line.split(":")[0] + ':" is invalid because the number of orientations must be positive.', type: "stop"})
+                postMessage({ value: '"' + line.split(":")[0] + ':" is invalid because the number of orientations must be positive.', type: "stop" })
             }
             let orientData = line.split(":")[1].split(" ");
-            for (let i=0; i<orientData.length; i++) {
+            for (let i = 0; i < orientData.length; i++) {
                 let pieceIndex = pieceList.indexOf(removeBrackets(orientData[i]));
                 if (pieceIndex !== -1) {
                     if (pzl.cubeOri[pieceIndex] % numOri != 0) {
-                        postMessage({value: "Cannot set number of orientations of piece " + removeBrackets(orientData[i]) + 
-                        " to " + numOri + " because " + numOri + " is not divisible by " + pzl.cubeOri[pieceIndex] + ".", type: "stop"})
+                        postMessage({
+                            value: "Cannot set number of orientations of piece " + removeBrackets(orientData[i]) +
+                                " to " + numOri + " because " + numOri + " is not divisible by " + pzl.cubeOri[pieceIndex] + ".", type: "stop"
+                        })
                     }
                     pzl.cubeOri[pieceIndex] = numOri;
                 } else if (removeBrackets(orientData[i]) !== "") {
-                    postMessage({value: '"' + removeBrackets(orientData[i]) + '" is not a piece. (error in Unique Orientations & Equivalences)', type: "stop"})
+                    postMessage({ value: '"' + removeBrackets(orientData[i]) + '" is not a piece. (error in Unique Orientations & Equivalences)', type: "stop" })
                 }
             }
         }
@@ -251,8 +253,8 @@ function initCubeOri(pzl, pieceList, ignore) {
  * @return {Puzzle} Puzzle with given subgroup and prune table
  */
 function getSubPuzzle(pieceList, fullPuzzle, ignore, subgroup, prune, adjust) {
-    let generators = (subgroup.replace(" ","").length > 0) ? splitSubgroupStr(subgroup) : fullPuzzle.clockwiseMoveStr;
-    
+    let generators = (subgroup.replace(" ", "").length > 0) ? splitSubgroupStr(subgroup) : fullPuzzle.clockwiseMoveStr;
+
     let hasNonAdjust = false;
     for (let move of generators) {
         for (let move2 of generators) {
@@ -261,11 +263,11 @@ function getSubPuzzle(pieceList, fullPuzzle, ignore, subgroup, prune, adjust) {
             }
         }
     }
-    if (!hasNonAdjust) {postMessage({value: '"' + subgroup + '" is not a valid subgroup because it is commutative.', type: "stop"})}
+    if (!hasNonAdjust) { postMessage({ value: '"' + subgroup + '" is not a valid subgroup because it is commutative.', type: "stop" }) }
 
     for (let move of adjust) {
         if (!generators.includes(move)) {
-            postMessage({value: '"' + subgroup + '" is not a valid subgroup because it does not contain the adjust move "' + move + '".', type: "stop"})
+            postMessage({ value: '"' + subgroup + '" is not a valid subgroup because it does not contain the adjust move "' + move + '".', type: "stop" })
         }
     }
 
@@ -275,20 +277,20 @@ function getSubPuzzle(pieceList, fullPuzzle, ignore, subgroup, prune, adjust) {
     initCubeOri(subPuzzle, pieceList, ignore);
 
     subPuzzle.setAdjustMoves(adjust.length); // deal with adjust: setAdjustMoves passes in a NUMBER
-    postMessage({value: 0, type: "set-depth"})
+    postMessage({ value: 0, type: "set-depth" })
 
     function errParse(x, parseFunc) {
         let pFloat = parseFunc(x, 10);
         if (pFloat !== pFloat) {
-            postMessage({value: '"' + x + '" is not a valid prune depth.', type: "stop"});
+            postMessage({ value: '"' + x + '" is not a valid prune depth.', type: "stop" });
         }
         return pFloat;
     }
 
     if (prune.toLowerCase().includes("m")) {
-        subPuzzle.createPrunSized(errParse(prune, parseFloat) * 1e6 );
+        subPuzzle.createPrunSized(errParse(prune, parseFloat) * 1e6);
     } else if (prune.toLowerCase().includes("k")) {
-        subPuzzle.createPrunSized(errParse(prune, parseFloat) * 1e3 );
+        subPuzzle.createPrunSized(errParse(prune, parseFloat) * 1e3);
     } else {
         subPuzzle.createPrun(errParse(prune, parseInt));
     }
@@ -300,7 +302,7 @@ function checkMoveGroup(puzzle, movegroup, errorStr) {
     let moves = splitSubgroupStr(movegroup);
     for (let move of moves) {
         if (!puzzle.moveStr.includes(move)) {
-            postMessage({value: '"' + move + '" is not a valid move in ' + errorStr, type: "stop"});
+            postMessage({ value: '"' + move + '" is not a valid move in ' + errorStr, type: "stop" });
         }
     }
 }
@@ -310,17 +312,17 @@ function parseModifiers(input) {
     function errParse(x) {
         let pInt = parseInt(x, 10);
         if (pInt !== pInt || pInt <= 0) {
-            postMessage({value: '"' + x + '" is not a positive number. (Error in Scramble)', type: "stop"});
+            postMessage({ value: '"' + x + '" is not a positive number. (Error in Scramble)', type: "stop" });
         }
         return pInt;
     }
 
-    input = input.replaceAll("\n","");
+    input = input.replaceAll("\n", "");
     let indexPound = input.indexOf("#");
     if (indexPound === -1) {
         return [new Set(), 1];
     }
-    let modificationStr = input.slice(indexPound+1);
+    let modificationStr = input.slice(indexPound + 1);
     let modificationList = modificationStr.split(",").filter(x => x !== "");
     let modifications = new Set();
     let startNum = Infinity;
@@ -331,7 +333,7 @@ function parseModifiers(input) {
             let int1 = errParse(mod.split("-")[0]);
             let int2 = errParse(mod.split("-")[1]);
             if (int2 <= int1) {
-                postMessage({value: 'Invalid range: "' + mod + '" (Error in Scramble)', type: "stop"});
+                postMessage({ value: 'Invalid range: "' + mod + '" (Error in Scramble)', type: "stop" });
             }
             for (var i = int1; i <= int2; i++) {
                 modifications.add(i);
@@ -347,18 +349,18 @@ function parseBatch(input) {
     let closingChar = "";
     let dataInside = "";
     let finalData = [];
-    const bracketMap = new Map([["[","]"],["<",">"]]);
-    for (let i=0; i<input.length; i++) {
-        let char = input[i]; 
+    const bracketMap = new Map([["[", "]"], ["<", ">"]]);
+    for (let i = 0; i < input.length; i++) {
+        let char = input[i];
         if (closingChar !== "") {
             if (char === closingChar) {
                 finalData.push([closingChar, dataInside]);
-                closingChar = ""; 
+                closingChar = "";
                 dataInside = "";
             } else {
                 dataInside += char;
                 if (i === input.length - 1) {
-                    postMessage({value: 'Missing "' + closingChar + '" in Scramble', type: "stop"});
+                    postMessage({ value: 'Missing "' + closingChar + '" in Scramble', type: "stop" });
                 }
             }
         } else {
@@ -377,44 +379,50 @@ function parseBatch(input) {
 
 function calcState(state, subPuzzles, showPostAdj) {
     let numSolutions = 0; //added
-    let solutionList = []; //added
     let scrambleList = []; //added
     for (let subData of subPuzzles) {
         let searchDepth = parseInt(subData.search, 10);
         if (searchDepth !== searchDepth) {// that means it's NaN
-            if (subData.search[0] === "=") {searchDepth = subData.puzzle.pruneDepth}
-            else if (subData.search[0] === "+") {searchDepth = subData.puzzle.pruneDepth + (subData.search.split("+").length-1) } // the prune depth PLUS the number of +
-            else if (subData.search[0] === "-") {searchDepth = subData.puzzle.pruneDepth - (subData.search.split("-").length-1) } // the prune depth MINUS the number of -
-            else {postMessage({value: '"' + subData.search + '" is not a valid search depth.', type: "stop"})}
+            if (subData.search[0] === "=") { searchDepth = subData.puzzle.pruneDepth }
+            else if (subData.search[0] === "+") { searchDepth = subData.puzzle.pruneDepth + (subData.search.split("+").length - 1) } // the prune depth PLUS the number of +
+            else if (subData.search[0] === "-") { searchDepth = subData.puzzle.pruneDepth - (subData.search.split("-").length - 1) } // the prune depth MINUS the number of -
+            else { postMessage({ value: '"' + subData.search + '" is not a valid search depth.', type: "stop" }) }
         }
         for (let solution of subData.puzzle.solve(state, searchDepth, showPostAdj)) {
-            postMessage({value: solution, type: "solution"});
+            //postMessage({ value: solution, type: "solution" });
 
-         //added
-            if(numSolutions < 20){
-                    if (!solution.includes("z")) {
-                     // console.log("woohoooooooooooo");
-                      numSolutions++;
-                      //console.log(state + " " + subPuzzles + " " + showPostAdj);
-                      scrambleList.push(solution);
-                     // console.log(scrambleList);
-                     if (numSolutions === 20) {
+            //added
+
+            if (numSolutions < 20) {
+                //console.log("numSolutuioins" + numSolutions);
+                if (!solution.includes("z")) {
+                    // console.log("woohoooooooooooo");
+                    numSolutions++;
+                    //console.log(state + " " + subPuzzles + " " + showPostAdj);
+                    scrambleList.push(solution);
+                    // console.log(scrambleList);
+                    if (numSolutions === 20) {
                         console.log("finally 20 " + scrambleList);
-                        postMessage({value: scrambleList, type: "scrambles"});
-                      } 
+                        postMessage({ value: 0, type: "set-depth" })
+                        postMessage({ value: scrambleList, type: "scrambles" });
                     } else {
-                     // console.log("this scramble has a z")
+
                     }
-                  } else {
-                    console.log("over 20 algs");    
-                       /* postMessage({ value: { index: solutionIndex, setup: stateStr, num: caseNum }, type: "next-state" });
-                        calcState(state, subPuzzles, input.showPost);
-                        solutionIndex++; */
-                    return;
                 }
-            }   
-            //end
-        postMessage({value: 0, type: "set-depth"})
+            } else {
+                console.log("over 20 algs");
+                /* postMessage({ value: { index: solutionIndex, setup: stateStr, num: caseNum }, type: "next-state" });
+                 calcState(state, subPuzzles, input.showPost);
+                 solutionIndex++; */
+                return;
+            }
+        }
+        if (numSolutions < 20) {
+            alert("error broski");
+            postMessage({ value: numSolutions, type: "error" });
+        }
+        //end
+        postMessage({ value: 0, type: "set-depth" })
     }
 }
 
@@ -427,11 +435,11 @@ function removeBrackets(s) { // Removes (), {}, <>, and []
  * @return {String[]} Array of move strings contained in the input string
  */
 function splitSubgroupStr(s) {
-    return removeBrackets(s).replaceAll(","," ").split(" ").filter(x => x !== "");
+    return removeBrackets(s).replaceAll(",", " ").split(" ").filter(x => x !== "");
 }
 
 function lastAlpha(move) {
-    let needle = move.length-1;
+    let needle = move.length - 1;
     while (needle >= 0) {
         if (/[a-zA-Z]/.test(move[needle])) {
             return needle;
@@ -447,9 +455,9 @@ function lastAlpha(move) {
  * @param {any[]} arr1 
  * @param {any[]} arr2 
  */
-function arraysEqual(arr1,arr2) {
-    for (let i=0; i<arr1.length; i++) {
-        if (arr1[i] !== arr2[i]) {return false}
+function arraysEqual(arr1, arr2) {
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) { return false }
     }
     return true
 }
@@ -460,10 +468,10 @@ function arraysEqual(arr1,arr2) {
  * optionally selecting an element from arrays[0], then optionally
  * selecting an element from arrays[1], etc. Always contains the empty array.
  */
-function cartesian(arrays) { 
-	let singleStep = (arrays, add) => {return arrays.concat(...add.map(next => arrays.map( arr => arr.concat(next) )))} 
-	let prod = [[]];
-    for (arr of arrays) {prod = singleStep(prod, arr)}
+function cartesian(arrays) {
+    let singleStep = (arrays, add) => { return arrays.concat(...add.map(next => arrays.map(arr => arr.concat(next)))) }
+    let prod = [[]];
+    for (arr of arrays) { prod = singleStep(prod, arr) }
     return prod;
 }
 
@@ -482,10 +490,10 @@ function cartesian(arrays) {
  * this.moveNexts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, 0]; // for 3x3x3 STM
  */
 function getMoveNexts(moveWeights) {
-    let moveOrder = moveWeights.map((elem, ind) => ([ind, elem])).sort((iep1, iep2) => (iep1[1]-iep2[1])).map(c => c[0]);
+    let moveOrder = moveWeights.map((elem, ind) => ([ind, elem])).sort((iep1, iep2) => (iep1[1] - iep2[1])).map(c => c[0]);
     let moveNexts = [];
-    for (let i=0; i<moveWeights.length; i++) {
-        let moveRanking = moveOrder.indexOf(i)+1;
+    for (let i = 0; i < moveWeights.length; i++) {
+        let moveRanking = moveOrder.indexOf(i) + 1;
         moveNexts.push(moveRanking === moveWeights.length ? -1 : moveOrder[moveRanking])
     }
     return moveNexts.concat(moveOrder[0]);
@@ -493,15 +501,15 @@ function getMoveNexts(moveWeights) {
 
 class Puzzle {
     // executes one move on specified start cube and outputs in result cube.
-    mult (start, move, result) {
+    mult(start, move, result) {
         for (let p = 0; p < this.pcCount; p++) {
             let temp = (start[move[p] & this.posMask] + (move[p] & this.oriMask));
             let tempOri = this.cubeOri[temp & this.posMask];
             result[p] = temp % (tempOri << this.posBits);
         }
     }
-    
-    constructor (cubeOri, clockwiseMoves, clockwiseMoveStr, solvedState=null, moveWeightsMap=new Map()) {
+
+    constructor(cubeOri, clockwiseMoves, clockwiseMoveStr, solvedState = null, moveWeightsMap = new Map()) {
         // initialize cube constants
         this.cubeOri = cubeOri;
         this.pcCount = cubeOri.length; // 20
@@ -514,31 +522,31 @@ class Puzzle {
         this.moveStr = [];
 
         this.nullmove = [];
-        for (let i=0; i<this.pcCount; i++) {this.nullmove[i] = i}
+        for (let i = 0; i < this.pcCount; i++) { this.nullmove[i] = i }
         if (solvedState === null) {
             this.solved = this.nullmove;
-        } else {this.solved = solvedState}
+        } else { this.solved = solvedState }
 
         // initialize moves in all directions (ex. clockwise, counter, and double) and inverse mapping
         this.moves = []; // clockwise, counter, and double moves
         this.inverse = []; // mapping of inverse moves
-        for (let i=0; i<clockwiseMoves.length; i++) { // initialize the moves array and inverse array
+        for (let i = 0; i < clockwiseMoves.length; i++) { // initialize the moves array and inverse array
             this.moves.push(clockwiseMoves[i]); // put the clockwise version of the move in 
             while (true) {
                 this.moves.push([]);
-                this.mult(this.moves[this.moves.length-2],clockwiseMoves[i],this.moves[this.moves.length-1]); // put the repeated moves in (U2, U')
-                if (arraysEqual(this.moves[this.moves.length-1],this.nullmove)) { // break if repeated move was the solved state
+                this.mult(this.moves[this.moves.length - 2], clockwiseMoves[i], this.moves[this.moves.length - 1]); // put the repeated moves in (U2, U')
+                if (arraysEqual(this.moves[this.moves.length - 1], this.nullmove)) { // break if repeated move was the solved state
                     this.moves.pop();
                     break;
                 }
             }
-            let order = this.moves.length-this.inverse.length+1;
+            let order = this.moves.length - this.inverse.length + 1;
             let currentMove = clockwiseMoveStr.shift();
-            for (let j=1; j<order; j++) { // Loops once for each added move. Adds the string representation of moves to moveStr.
-                if (j <= order/2) {
-                    this.moveStr.push(currentMove+(j!=1?j:""));
+            for (let j = 1; j < order; j++) { // Loops once for each added move. Adds the string representation of moves to moveStr.
+                if (j <= order / 2) {
+                    this.moveStr.push(currentMove + (j != 1 ? j : ""));
                 } else {
-                    this.moveStr.push(currentMove+((order-j)!=1?(order-j):"")+"'");
+                    this.moveStr.push(currentMove + ((order - j) != 1 ? (order - j) : "") + "'");
                 }
             }
             let invCounter = this.moves.length;
@@ -550,27 +558,27 @@ class Puzzle {
 
         // initialize valid pairs grid
         this.validPairs = [];
-        for (let move1=0; move1<this.moves.length; move1++) { // initialize the valid pairs array
+        for (let move1 = 0; move1 < this.moves.length; move1++) { // initialize the valid pairs array
             this.validPairs[move1] = [];
-            for (let move2=0; move2<this.moves.length; move2++) {
+            for (let move2 = 0; move2 < this.moves.length; move2++) {
                 let prod1 = [];
                 let prod2 = [];
                 this.mult(this.moves[move1], this.moves[move2], prod1);
                 this.mult(this.moves[move2], this.moves[move1], prod2);
                 // Compares if A B = B A. Two moves of the same type are never valid (like B B2), and two commuting moves of different types are only valid in one way (exactly one of U D2 and D2 U are valid)
-                if (arraysEqual(prod1, prod2)) { 
+                if (arraysEqual(prod1, prod2)) {
                     this.validPairs[move1][move2] = (move1 < move2);
                     if (arraysEqual(prod1, this.nullmove)) {
                         this.validPairs[move1][move2] = false;
                     }
-                    for (let m=0; m<this.moves.length; m++) {
+                    for (let m = 0; m < this.moves.length; m++) {
                         if (arraysEqual(prod1, this.moves[m])) {
                             this.validPairs[move1][move2] = false;
                         }
                     }
-                } else { 
+                } else {
                     this.validPairs[move1][move2] = true;
-                } 
+                }
             }
         }
 
@@ -581,7 +589,7 @@ class Puzzle {
         // initialize adjust moves (none upon initialization)
         this.adjustSequences = [[]];
         this.adjustMovesTable = [];
-        for (let i=0; i<this.moves.length; i++) {
+        for (let i = 0; i < this.moves.length; i++) {
             this.adjustMovesTable[i] = false;
         }
         this.adjustCount = 0;
@@ -589,19 +597,19 @@ class Puzzle {
         // initialize move weights 
         this.moveWeightsMap = moveWeightsMap;
         this.moveWeights = [];
-        for (let i=0; i<this.moves.length; i++) {
+        for (let i = 0; i < this.moves.length; i++) {
             let moveName = this.moveStr[i];
-            let moveType = moveName.slice(0, lastAlpha(moveName)+1)+"_";
-            let moveAmount = "_"+moveName.slice(lastAlpha(moveName)+1);
-            if (moveWeightsMap.has(moveName)) {this.moveWeights.push(moveWeightsMap.get(moveName))}
-            else if (moveWeightsMap.has(moveType)) {this.moveWeights.push(moveWeightsMap.get(moveType))}
-            else if (moveWeightsMap.has(moveAmount)) {this.moveWeights.push(moveWeightsMap.get(moveAmount))}
-            else if (moveWeightsMap.has("__")) {this.moveWeights.push(moveWeightsMap.get("__"))}
-            else {this.moveWeights.push(1)}
+            let moveType = moveName.slice(0, lastAlpha(moveName) + 1) + "_";
+            let moveAmount = "_" + moveName.slice(lastAlpha(moveName) + 1);
+            if (moveWeightsMap.has(moveName)) { this.moveWeights.push(moveWeightsMap.get(moveName)) }
+            else if (moveWeightsMap.has(moveType)) { this.moveWeights.push(moveWeightsMap.get(moveType)) }
+            else if (moveWeightsMap.has(moveAmount)) { this.moveWeights.push(moveWeightsMap.get(moveAmount)) }
+            else if (moveWeightsMap.has("__")) { this.moveWeights.push(moveWeightsMap.get("__")) }
+            else { this.moveWeights.push(1) }
         }
 
         this.inverseWeights = [];
-        for (let i=0; i<this.moves.length; i++) {
+        for (let i = 0; i < this.moves.length; i++) {
             this.inverseWeights.push(this.moveWeights[this.inverse[i]]);
         }
 
@@ -617,8 +625,8 @@ class Puzzle {
     // executes sequence on specified starting state
     execute(start, sequence) {
         let tempCube = [];
-        for (let j=0; j<sequence.length; j++) {
-            this.mult(start, this.moves[sequence[j]],tempCube)
+        for (let j = 0; j < sequence.length; j++) {
+            this.mult(start, this.moves[sequence[j]], tempCube)
             start = tempCube.slice();
         }
         return start
@@ -638,7 +646,7 @@ class Puzzle {
     // Convert a puzzle array like [2, 1, 6, 0, 5, 4, 3, 7] into a compact string. The totalBits is the number of bits to allocate per number. Takes place of strConv.
     compressArr(list) {
         let string = "";
-        for (let i=0; i<list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
             string += String.fromCharCode(list[i]);
         }
         return string;
@@ -648,7 +656,7 @@ class Puzzle {
     nextValidInitial(move, moveNextTable) {
         let x = moveNextTable[move];
         while (true) {
-            if (x === -1 || !(this.adjustMovesTable[x])) {return x};
+            if (x === -1 || !(this.adjustMovesTable[x])) { return x };
             x = moveNextTable[x];
         }
     }
@@ -666,15 +674,15 @@ class Puzzle {
             arr.pop(); // remove last element
             // increment next last element
             if (arr.length > 1) {
-                arr[arr.length-1] = this.nextValid(arr[arr.length-2], arr[arr.length-1], moveNextTable);
+                arr[arr.length - 1] = this.nextValid(arr[arr.length - 2], arr[arr.length - 1], moveNextTable);
             } else if (arr.length) {
                 arr[0] = this.nextValidInitial(arr[0], moveNextTable);
-                if (arr[0] === -1) {arr.pop()}
-            } 
-            if (arr.length === 0) {return}
-        } while (arr[arr.length-1] === -1)
+                if (arr[0] === -1) { arr.pop() }
+            }
+            if (arr.length === 0) { return }
+        } while (arr[arr.length - 1] === -1)
     }
-    
+
     // generates all sequences with an effective length (with weights, not including adjustments)
     // in the range (seqLength-1, seqLength]. Yields [cost excluding adjustments, sequence]
     *getPruneSequences(seqLength) {
@@ -684,20 +692,20 @@ class Puzzle {
             }
             return;
         }
-        postMessage({value: 1, type: "depthUpdate"});
+        postMessage({ value: 1, type: "depthUpdate" });
         let arr = [this.nextValidInitial(this.moves.length, this.inverseNexts)];
         while (arr.length) {
             let effectiveLength = this.getCost(arr, this.inverseWeights) - 1e-9;
             if (effectiveLength <= seqLength) {
-                if (effectiveLength > seqLength-1) {
+                if (effectiveLength > seqLength - 1) {
                     for (let sequence of this.adjustSequences) {
                         yield [effectiveLength + 1e-9, sequence.concat(arr)]; // need to account for adjust moves
                     }
                 }
                 // add an element to arr
-                arr.push(this.nextValid(arr[arr.length-1], this.moves.length, this.inverseNexts));
+                arr.push(this.nextValid(arr[arr.length - 1], this.moves.length, this.inverseNexts));
             }
-            if (effectiveLength + this.inverseWeights[arr[arr.length-1]] > seqLength) {this.popAndAdvance(arr, this.inverseNexts)}
+            if (effectiveLength + this.inverseWeights[arr[arr.length - 1]] > seqLength) { this.popAndAdvance(arr, this.inverseNexts) }
         }
     }
 
@@ -710,49 +718,49 @@ class Puzzle {
             }
             return;
         }
-        postMessage({value: 1, type: "depthUpdate"});
+        postMessage({ value: 1, type: "depthUpdate" });
         let arr = [this.nextValidInitial(this.moves.length, this.moveNexts)];
         while (arr.length) {
             let effectiveLength = this.getCost(arr, this.moveWeights) + 1e-9;
-            if (effectiveLength - this.moveWeights[arr[arr.length-1]] < seqLength) {
-                if (effectiveLength - this.moveWeights[arr[arr.length-1]] >= seqLength-1) {
+            if (effectiveLength - this.moveWeights[arr[arr.length - 1]] < seqLength) {
+                if (effectiveLength - this.moveWeights[arr[arr.length - 1]] >= seqLength - 1) {
                     for (let sequence of this.adjustSequences) {
                         yield [effectiveLength - 1e-9, sequence.concat(arr)];
                     }
                 }
                 // add an element to arr
-                arr.push(this.nextValid(arr[arr.length-1], this.moves.length, this.moveNexts));            
-            } 
-            if (effectiveLength >= seqLength) {this.popAndAdvance(arr, this.moveNexts)}
+                arr.push(this.nextValid(arr[arr.length - 1], this.moves.length, this.moveNexts));
+            }
+            if (effectiveLength >= seqLength) { this.popAndAdvance(arr, this.moveNexts) }
         }
     }
 
     // convert a sequence of moves, internally represented by a string of numbers, into human-readable text
-    moveListToStr(list, parens=false) {
+    moveListToStr(list, parens = false) {
         let result = "";
         let adjusting = false;
-        for (let i=0; i<list.length; i++) {
-            
+        for (let i = 0; i < list.length; i++) {
+
             // open parenthesis
-            if (parens && i==0 && this.adjustMovesTable[list[i]]) {
+            if (parens && i == 0 && this.adjustMovesTable[list[i]]) {
                 result += "(";
                 adjusting = true;
             }
- 
+
             // move
             result += this.moveStr[list[i]];
 
             // close parenthesis
-            if (parens && adjusting && (i==list.length-1 || !this.adjustMovesTable[list[i+1]])) {
+            if (parens && adjusting && (i == list.length - 1 || !this.adjustMovesTable[list[i + 1]])) {
                 result += ")";
                 adjusting = false;
             }
 
             // space
-            if (i != list.length-1) {
+            if (i != list.length - 1) {
                 result += " ";
             }
- 
+
         }
         return result
     }
@@ -762,26 +770,26 @@ class Puzzle {
     moveStrToList(alg) {
         let result = [];
         let algSplit = alg.split(" ");
-        for (let i=0; i<algSplit.length; i++) {
+        for (let i = 0; i < algSplit.length; i++) {
             if (algSplit[i] != "") {
                 let moveNum = this.moveStr.indexOf(algSplit[i]);
                 if (moveNum != -1) {
                     result.push(moveNum);
                 } else {
-                    postMessage({value: 'Unexpected token in Scramble: "' + algSplit[i] + '"', type: "stop"});
+                    postMessage({ value: 'Unexpected token in Scramble: "' + algSplit[i] + '"', type: "stop" });
                 }
             }
         }
         return result
     }
-    
+
     // create a prune table up to a given depth
     createPrun(maxDepth) {
         let tempTable = new Map();
-        for (let depth=0; depth<=maxDepth; depth++) {
+        for (let depth = 0; depth <= maxDepth; depth++) {
             for (let [cost, sequence] of this.getPruneSequences(depth)) {
                 let cubeStr = this.compressArr(this.execute(this.solved, sequence));
-                if (!(tempTable.has(cubeStr)) || tempTable.get(cubeStr)>cost) {tempTable.set(cubeStr, cost)}
+                if (!(tempTable.has(cubeStr)) || tempTable.get(cubeStr) > cost) { tempTable.set(cubeStr, cost) }
             }
         }
         this.pruneTable = tempTable;
@@ -791,15 +799,15 @@ class Puzzle {
     // used only for createPrunSized
     stopPruning(maxSize, highestCost, prevSizes) {
         let sizeRatio = 0;
-        for (let i=prevSizes.length-highestCost; i<prevSizes.length; i++) {
-            if (i>0) {
-                sizeRatio = Math.max(sizeRatio, prevSizes[i]/(prevSizes[i-1]+1))
+        for (let i = prevSizes.length - highestCost; i < prevSizes.length; i++) {
+            if (i > 0) {
+                sizeRatio = Math.max(sizeRatio, prevSizes[i] / (prevSizes[i - 1] + 1))
             }
         }
-        if (sizeRatio * prevSizes[prevSizes.length-1] > maxSize) {return true}
-        let hcPrevious = prevSizes.length-1-highestCost>=0 ? prevSizes[prevSizes.length-1-highestCost] : 0
-        let hc2Previous = prevSizes.length-1-2*highestCost>=0 ? prevSizes[prevSizes.length-1-2*highestCost] : 0
-        if (2*hcPrevious > prevSizes[prevSizes.length-1] + hc2Previous) {return true}
+        if (sizeRatio * prevSizes[prevSizes.length - 1] > maxSize) { return true }
+        let hcPrevious = prevSizes.length - 1 - highestCost >= 0 ? prevSizes[prevSizes.length - 1 - highestCost] : 0
+        let hc2Previous = prevSizes.length - 1 - 2 * highestCost >= 0 ? prevSizes[prevSizes.length - 1 - 2 * highestCost] : 0
+        if (2 * hcPrevious > prevSizes[prevSizes.length - 1] + hc2Previous) { return true }
         return false;
     }
 
@@ -812,10 +820,10 @@ class Puzzle {
         while (true) {
             for (let [cost, sequence] of this.getPruneSequences(depth)) {
                 let cubeStr = this.compressArr(this.execute(this.solved, sequence));
-                if (!(tempTable.has(cubeStr)) || tempTable.get(cubeStr)>cost) {tempTable.set(cubeStr, cost)}
+                if (!(tempTable.has(cubeStr)) || tempTable.get(cubeStr) > cost) { tempTable.set(cubeStr, cost) }
             }
             prevSizes.push(tempTable.size)
-            if (this.stopPruning(maxSize, highestCost, prevSizes)) {break}
+            if (this.stopPruning(maxSize, highestCost, prevSizes)) { break }
             depth++;
         }
         this.pruneTable = tempTable;
@@ -824,35 +832,35 @@ class Puzzle {
 
     // read all solutions from a given state under the prune table's depth
     // not done yet
-    *readPrun(state, partialSolve=[], showPostAdj, maxDepth=this.pruneDepth) { // maxDepth should be the same as the prune table's maxDepth
-        for (let m=0; m<this.moves.length; m++) {
-            if (partialSolve.length == 0 || this.validPairs[partialSolve[partialSolve.length-1]][m]) {
+    *readPrun(state, partialSolve = [], showPostAdj, maxDepth = this.pruneDepth) { // maxDepth should be the same as the prune table's maxDepth
+        for (let m = 0; m < this.moves.length; m++) {
+            if (partialSolve.length == 0 || this.validPairs[partialSolve[partialSolve.length - 1]][m]) {
                 let nextState = this.execute(state, [m]);
                 let nextDistance = this.pruneTable.get(this.compressArr(nextState));
-                if (nextDistance === 0) { 
+                if (nextDistance === 0) {
                     let fullSolve = partialSolve.concat(m);
                     if (!this.hasEndAdjust(fullSolve)) {
-                        if (showPostAdj) {yield * [this.moveListToStr(fullSolve, true) + " " + this.moveListToStr(this.getEndAdjust(nextState), true)]}
-                        else {yield * [this.moveListToStr(fullSolve, true)]}
+                        if (showPostAdj) { yield* [this.moveListToStr(fullSolve, true) + " " + this.moveListToStr(this.getEndAdjust(nextState), true)] }
+                        else { yield* [this.moveListToStr(fullSolve, true)] }
                     }
-                } else if (nextDistance <= maxDepth-this.moveWeights[m]) { // false if nextDistance is undefined
-                    yield * this.readPrun(nextState, partialSolve.concat(m), showPostAdj, maxDepth-this.moveWeights[m]);
+                } else if (nextDistance <= maxDepth - this.moveWeights[m]) { // false if nextDistance is undefined
+                    yield* this.readPrun(nextState, partialSolve.concat(m), showPostAdj, maxDepth - this.moveWeights[m]);
                 }
             }
         }
     }
 
     // generating function that returns all solutions for a state
-    *solve(state, searchDepth, showPostAdj, startDepth=0) {
-        for (let depth=startDepth; depth<=searchDepth; depth++) {
+    *solve(state, searchDepth, showPostAdj, startDepth = 0) {
+        for (let depth = startDepth; depth <= searchDepth; depth++) {
             for (let [cost, sequence] of this.getSearchSequences(depth)) {
                 let nextState = this.execute(state, sequence);
                 let thisDistance = this.pruneTable.get(this.compressArr(nextState));
                 if (thisDistance !== undefined) {
-                    yield * this.readPrun(nextState, sequence, showPostAdj, Math.min(this.pruneDepth, this.pruneDepth+searchDepth-cost));
+                    yield* this.readPrun(nextState, sequence, showPostAdj, Math.min(this.pruneDepth, this.pruneDepth + searchDepth - cost));
                 }
-            }   
-        }  
+            }
+        }
     }
 
     // EXPERIMENTAL METHODS
@@ -870,19 +878,19 @@ class Puzzle {
 
     // returns true iff sequence has any adjust moves that are either at the end or can be moved to the end by commuting
     hasEndAdjust(list) {
-        for (let i=list.length-1; i<list.length && i>=0; i--) {
+        for (let i = list.length - 1; i < list.length && i >= 0; i--) {
             if (this.adjustMovesTable[list[i]]) {
                 let allAfterCommute = true;
-                for (let j=i+1; j<list.length; j++) {
-                    if (!(this.commutes(list[i], list[j]))) {allAfterCommute = false}
+                for (let j = i + 1; j < list.length; j++) {
+                    if (!(this.commutes(list[i], list[j]))) { allAfterCommute = false }
                 }
-                if (allAfterCommute) {return true}
+                if (allAfterCommute) { return true }
             } else {
                 let noAdjustCommute = true;
-                for (let j=0; j<this.adjustMovesTable.length; j++) {
-                    if (this.adjustMovesTable[j] && this.commutes(list[i], j)) {noAdjustCommute = false}
+                for (let j = 0; j < this.adjustMovesTable.length; j++) {
+                    if (this.adjustMovesTable[j] && this.commutes(list[i], j)) { noAdjustCommute = false }
                 }
-                if (noAdjustCommute) {return false}
+                if (noAdjustCommute) { return false }
             }
         }
         return false;
@@ -906,13 +914,13 @@ class Puzzle {
             moveReps.push(currentRep);
             let move = this.execute(this.moves[currentRep], [moveNum]);
             currentRep = -1;
-            for (let i=0; i<this.moves.length; i++) {
+            for (let i = 0; i < this.moves.length; i++) {
                 if (arraysEqual(this.moves[i], move)) {
                     currentRep = i;
                     break;
                 }
             }
-            if (currentRep === -1) {break}
+            if (currentRep === -1) { break }
         }
         return moveReps;
     }
@@ -921,7 +929,7 @@ class Puzzle {
         let moveList = this.clockwiseMoveStr.slice(0, num).map(str => this.moveStr.indexOf(str));
         this.adjustCount = moveList.length;
         let adjustMoves = [];
-        for (let i=0; i<this.moves.length; i++) {this.adjustMovesTable[i] = false}
+        for (let i = 0; i < this.moves.length; i++) { this.adjustMovesTable[i] = false }
         for (let moveNum of moveList) {
             let moveReps = this.getMoveMultiples(moveNum);
             for (let j of moveReps) {
@@ -934,23 +942,23 @@ class Puzzle {
 
     setSubgroup(generators) {
         let genArray = [];
-        for (let i=0; i<generators.length; i++) {
+        for (let i = 0; i < generators.length; i++) {
             let gen = generators[i];
             if (!this.moveStr.includes(gen)) {
-                postMessage({value: '"' + gen + '" is not a valid move in Subgroup.', type: "stop"})
+                postMessage({ value: '"' + gen + '" is not a valid move in Subgroup.', type: "stop" })
             }
             genArray.push(this.execute(this.nullmove, this.moveStrToList(gen)));
         }
         return new Puzzle(this.cubeOri.slice(), genArray, generators, this.solved.slice(), this.moveWeightsMap);
     }
-    
+
     compressStr(str) {
         return this.compressArr(this.execute(this.solved, this.moveStrToList(str)));
     }
 
     seriesMult(stateLists) {
         let states = new Map(stateLists[0].map(x => [this.compressStr(x), x]));
-        for (let i=1; i<stateLists.length; i++) {
+        for (let i = 1; i < stateLists.length; i++) {
             let newStates = new Map();
             let algs = stateLists[i];
             for (let state of states.values()) {
@@ -983,7 +991,7 @@ class Puzzle {
             }
             newStates = nextStates;
             nextStates = new Map();
-            postMessage({value: states.size + " (not reduced)", type: "num-states"})
+            postMessage({ value: states.size + " (not reduced)", type: "num-states" })
         }
         return Array.from(states.values());
     }
@@ -1018,9 +1026,9 @@ class Puzzle {
     }
 
     compareStates(state1, state2) {
-        for (let i=0; i<state1.length; i++) {
-            if (state1[i] > state2[i]) {return 1}
-            if (state1[i] < state2[i]) {return -1}
+        for (let i = 0; i < state1.length; i++) {
+            if (state1[i] > state2[i]) { return 1 }
+            if (state1[i] < state2[i]) { return -1 }
         }
         return 0;
     }
@@ -1037,7 +1045,7 @@ class Puzzle {
         input = (input.includes("#") ? input.slice(0, input.indexOf("#")) : input).replaceAll("\n", "");
         let parsedInput = parseBatch(input);
         let states = [""];
-        for (let i=0; i<parsedInput.length; i++) {
+        for (let i = 0; i < parsedInput.length; i++) {
             let type = parsedInput[i][0];
             let data = parsedInput[i][1];
             if (type === "") {
@@ -1064,7 +1072,7 @@ function maskedIndex(stateArr, num, bitMask, piece) {
         }
         ind++;
     }
-    postMessage({value: 'Invalid piece: "' + piece + '"', type: "stop"})
+    postMessage({ value: 'Invalid piece: "' + piece + '"', type: "stop" })
 }
 
 function getStatePriority(str, pieceMap, sortCriteria, fullPuzzle) { // TODO: error handling
@@ -1073,7 +1081,7 @@ function getStatePriority(str, pieceMap, sortCriteria, fullPuzzle) { // TODO: er
     let minIndex = 0;
     let pcPriority = [];
     let statePriority = [];
-    for (let i=0; i<pcCount; i++) {
+    for (let i = 0; i < pcCount; i++) {
         pcPriority.push(i);
     }
     for (let criteria of sortCriteria) {
@@ -1084,7 +1092,7 @@ function getStatePriority(str, pieceMap, sortCriteria, fullPuzzle) { // TODO: er
                     let piece = pieceFull.trim();
                     if (piece.length > 0) {
                         if (!pieceMap.has(piece)) {
-                            postMessage({value: 'Invalid piece: "' + piece + '" (in Case Sorting)', type: "stop"});
+                            postMessage({ value: 'Invalid piece: "' + piece + '" (in Case Sorting)', type: "stop" });
                         }
                         pcPriority[pieceMap.get(piece)] = minIndex;
                         minIndex++;
@@ -1097,16 +1105,16 @@ function getStatePriority(str, pieceMap, sortCriteria, fullPuzzle) { // TODO: er
                     let piece = pieceFull.trim();
                     if (piece.length > 0) {
                         let pieceInd = pieceMap.get(piece);
-                        if (pieceInd === undefined) {postMessage({value: 'Invalid piece: "' + piece + '" (in Case Sorting)', type: "stop"})}
+                        if (pieceInd === undefined) { postMessage({ value: 'Invalid piece: "' + piece + '" (in Case Sorting)', type: "stop" }) }
 
-                        if (criteria.type === "ori-at") {ori.push( stateArr[pieceInd] & fullPuzzle.oriMask )}
-                        else if (criteria.type === "ori-of") {ori.push( stateArr[maskedIndex(stateArr, pieceInd, fullPuzzle.posMask, piece)] & fullPuzzle.oriMask )}
-                        else if (criteria.type === "perm-at") {ori.push( pcPriority[stateArr[pieceInd] & fullPuzzle.posMask] )}
-                        else if (criteria.type === "perm-of") {ori.push( pcPriority[maskedIndex(stateArr, pieceInd, fullPuzzle.posMask, piece)] )}
+                        if (criteria.type === "ori-at") { ori.push(stateArr[pieceInd] & fullPuzzle.oriMask) }
+                        else if (criteria.type === "ori-of") { ori.push(stateArr[maskedIndex(stateArr, pieceInd, fullPuzzle.posMask, piece)] & fullPuzzle.oriMask) }
+                        else if (criteria.type === "perm-at") { ori.push(pcPriority[stateArr[pieceInd] & fullPuzzle.posMask]) }
+                        else if (criteria.type === "perm-of") { ori.push(pcPriority[maskedIndex(stateArr, pieceInd, fullPuzzle.posMask, piece)]) }
                     }
                 }
                 if (criteria.type === "ori-at" || criteria.type === "ori-of") {
-                    let sortedOri = ori.slice().sort((a, b) => a-b);
+                    let sortedOri = ori.slice().sort((a, b) => a - b);
                     statePriority = statePriority.concat(sortedOri);
                 }
                 statePriority = statePriority.concat(ori);
