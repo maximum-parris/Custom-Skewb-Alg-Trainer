@@ -298,7 +298,7 @@ function editAlg() {
 
 function renderHint(i) {
     document.getElementById('editAlgButton').innerText = "edit"
-    document.getElementById("boxTitle").innerHTML = `${algsInformation[i]['algset']} ${algsInformation[i]['group']} ${algsInformation[i]['name']}`;
+    document.getElementById("boxTitle").innerHTML = `${algsInformation[i]['name']}`;
     var longestAlgLength = 0;
     var currentAlgs = algsInformation[i]["a"]
     console.log("this is currentAlgs");

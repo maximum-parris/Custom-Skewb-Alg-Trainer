@@ -66,7 +66,7 @@ function processAlgSet(csvArr) {
   const rows = csvArr.slice(1); // skip header row
 
   initProgressBar();
-  console.log("📄 CSV Array:", csvArr);
+  console.log("CSV Array:", csvArr);
 
   customNumCases = rows.length;
   let invArr = [];
