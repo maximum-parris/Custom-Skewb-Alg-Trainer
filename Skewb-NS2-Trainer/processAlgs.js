@@ -1,4 +1,5 @@
 var algsInformation = {};
+
 let workerOutput;
 var scramblesMap = {};
 let g = "#24ab4b";
@@ -60,6 +61,31 @@ const stickerPoints = {
   b5: '5.00 18.78 5.00 32.56 16.25 38.18'
 };
 
+var hasStoredInfo = false;
+
+function loadStorage() {
+  let invArr = [];
+  let storedAlgsInfo = localStorage.getItem("algsInfo");
+  if (storedAlgsInfo) {
+    hasStoredInfo = true;
+    algsInformation = JSON.parse(storedAlgsInfo);
+  }
+  let storedScramblesMap = localStorage.getItem("scrambles");
+  if (storedScramblesMap) {
+    hasStoredInfo = true;
+    scramblesMap = JSON.parse(storedScramblesMap);
+
+    initProgressBar();
+    for (i = 1; i <= Object.keys(algsInformation).length; i++) {
+      let alg = algsInformation[i].a[0][0];
+      invArr.push(flipAlg(alg));
+    }
+    getColourArr(invArr);
+    initSelection();
+    checkPostRender();
+  }
+  return;
+}
 
 function processAlgSet(csvArr) {
   const headers = csvArr[0];
@@ -204,9 +230,6 @@ function getScrambles(casesArr) {
   }
   solvestring += "]";
 
-  console.log(`Getting ${casesArr.length} scrambles`);
-  console.log(solvestring);
-
   let subgroupData = [{ subgroup: 'r l b B', prune: '6', search: '5' }];
   let sortData = [{ type: 'priority', pieces: '' }];
   /*console.log({puzzle: "l: (UFL-1 DFR-1 DBL-1) (DLF+1) (L F D)\nL: (URF-1 DLF-1 ULB-1) (UFL+1) (U F L)\nr: (DFR-1 UBR-1 DBL-1) (DRB+1) (R B D)\nR: (URF-1 ULB-1 DRB-1) (UBR+1) (R U B)\nb: (ULB-1 DLF-1 DRB-1) (DBL+1) (L D B)\nB: (UBR-1 UFL-1 DBL-1) (ULB+1) (U L B)\nF: (UFL-1 UBR-1 DFR-1) (URF+1) (F U R) \nf: (URF-1 DRB-1 DLF-1) (DFR+1) (F R D)\nS: (URF-1) (UFL+1) (ULB+1) (UBR-1) (R U) (F B)\nH: (URF+1) (UFL-1) (ULB-1) (UBR+1) (R U) (F B)\ns: (UBR-1) (ULB+1) (DRB-1) (DBL+1) (U D) (R B)\nh: (UBR+1) (ULB-1) (DRB+1) (DBL-1) (U D) (R B)      \nx: (F U B D) (URF+1 UBR-1 DRB+1 DFR-1) (UFL-1 ULB+1 DBL-1 DLF+1)\ny: (F L B R) (URF UFL ULB UBR) (DFR DLF DBL DRB)\nz: (U R D L) (URF-1 DFR+1 DLF-1 UFL+1) (UBR+1 DRB-1 DBL+1 ULB-1)\nvUperm: (U B D)\nhUperm: (U R D)", 
@@ -248,11 +271,8 @@ function getScrambles(casesArr) {
       workerOutput = event.data.value;
       scrGenned++;
       updateProgressBar(scrGenned);
-      console.log("worker output: ");
-      console.log(workerOutput);
       createScramblesMap(workerOutput);
     } else if (event.data.type === "error") {
-      console.log("alg " + csvArr[scrGenned].name + " " + csvArr[scrGenned].a[0] + " is entered incorrectly, please check formatting");
       alert("alg " + csvArr[scrGenned].name + " " + csvArr[scrGenned].a[0] + " is entered incorrectly, please check formatting");
     } else if (event.data.type === "depthUpdate") {
 
@@ -293,6 +313,7 @@ function getScrambles(casesArr) {
 
 //input -> ["scr1", "scr2"...]
 let numScrambleMapEntries = 0;
+
 function createScramblesMap(input) {
   //console.log(numScrambleMapEntries);
   let FPNscr = [];
@@ -686,6 +707,5 @@ function removeZrot(input) {
       res += move + " ";
     }
   });
-  console.log("removed z " + res)
   return res;
 }

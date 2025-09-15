@@ -9,8 +9,8 @@ function resize(event) {
     var gnds = document.getElementsByClassName('groupNameDiv');
     var maxWidth = document.getElementById('allSel').getBoundingClientRect().width;
     var fontSize = parseFloat(getComputedStyle(document.body).fontSize);
-    var itemWidth = 5*fontSize + 2* Math.floor(0.13*fontSize);
-    var gap = 0.2*fontSize;
+    var itemWidth = 5 * fontSize + 2 * Math.floor(0.13 * fontSize);
+    var gap = 0.2 * fontSize;
     var margin = fontSize;
     var numItemsFitInVP = Math.floor((vpWidth - margin - itemWidth) / (itemWidth + gap)) + 1;
     var algsPerRow = Math.min(numItemsFitInVP, maxAlgsPerRow);
@@ -28,7 +28,7 @@ function resize(event) {
         document.getElementById("modeButtons").style.transform = "unset";
     }
     document.getElementById('modeButtons').style.right = right + 'px';
-} 
+}
 
 function main() {
     //fie input
@@ -43,6 +43,8 @@ function main() {
     fileInput.style.display = 'block';
     startingContainer.appendChild(fileInput);
 
+    loadStorage();
+    
     //get file
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -56,11 +58,13 @@ function main() {
                 console.log(results.data);
                 processAlgSet(results.data);
             },
-         error: (err) => {
-            console.error('CSV parse error:', err);
-         }
+            error: (err) => {
+                console.error('CSV parse error:', err);
+            }
         });
     });
+
+    
 
     loadSettings();
     applySettings();
@@ -75,7 +79,7 @@ function main() {
         showMode(history.state);
     })
 
-    
+
 
     /// handles keypup and keydown events. Starts timer etc.
     document.getElementById("bodyid").addEventListener("keydown", function (event) {
@@ -174,20 +178,20 @@ fetch('combined.json')
             }
             var k = entry[0];
             const svg = entry[1];
-            const blob = new Blob([svg], {type: 'image/svg+xml'});
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
             const url = URL.createObjectURL(blob);
-           // blobUrls[k] = url;
-           //commented out for testing
-           // console.log(blobUrls);
+            // blobUrls[k] = url;
+            //commented out for testing
+            // console.log(blobUrls);
         }
         )
     }).then((_) => {
         fetch("../template.html")
-        .then((response) => response.text())
-        .then((bodyHTML) => {
-            loadSettings();
-            applySettings();
-            document.body.outerHTML = bodyHTML;
-            window.requestAnimationFrame(() => {window.requestAnimationFrame(main)})
-        });
+            .then((response) => response.text())
+            .then((bodyHTML) => {
+                loadSettings();
+                applySettings();
+                document.body.outerHTML = bodyHTML;
+                window.requestAnimationFrame(() => { window.requestAnimationFrame(main) })
+            });
     })

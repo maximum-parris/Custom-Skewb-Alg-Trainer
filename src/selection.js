@@ -9,9 +9,6 @@ Object.assign(selectionPresets['Default']['selCases'], selCases);
 Object.assign(selectionPresets['Default']['selectedAlgSets'], selectedAlgSets);
 function getAlgsetIds(algset) {
     var algsetIds = []
-    console.log("in getAlgsetIds");
-    console.log(algsets);
-    console.log(algset);
     for (const group of algsets[algset]) {
         algsetIds = algsetIds.concat(algsGroups[group]);
     }
@@ -92,8 +89,6 @@ function itemClicked(i) {
     }
 
     var index = selCases.indexOf(i);
-    console.log("this is selCases");
-    console.log(selCases);
     var wasSelected = (index != -1);
     if (wasSelected)
         selCases.splice(index, 1);

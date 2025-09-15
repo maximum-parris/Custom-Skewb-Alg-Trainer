@@ -191,7 +191,13 @@ input#fileNameEntry {
     height: 30px;
     border-radius: 8px;
     width: 120px;
+}
 
+#saveLocalBtn {
+    background-color: var(--primaryBG);
+    height: 30px;
+    border-radius: 8px;
+    width: 160px;
 }
 
 #creditsContainer {

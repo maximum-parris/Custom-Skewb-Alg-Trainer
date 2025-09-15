@@ -1,35 +1,28 @@
 function outputAlgs(k) {
     var s = "";
-   // var indeces = algsGroups[groupname];
+    // var indeces = algsGroups[groupname];
 
-   /* s += " onclick='selectCaseGroup(\"" + "place holder"
-        + "\")'><b>" + "place holder" + "</b></div>";
-    s += "<div class='rowFlex' style='flex-wrap: wrap'>"; */  //this is the head of the group it's in
+    /* s += " onclick='selectCaseGroup(\"" + "place holder"
+         + "\")'><b>" + "place holder" + "</b></div>";
+     s += "<div class='rowFlex' style='flex-wrap: wrap'>"; */  //this is the head of the group it's in
     var allSelected = false;
-  //  for (var j = 0; j < indeces.length; j++) {
-       // var i = indeces[j]; // case number
-       // k is now i 
-        var sel = (selCases.indexOf(k) != -1);
-        var dblclick = isMobile() ? ` ontouchstart='touchstart(event, () => {console.log("test"); showHint(null, ${k})})' ontouchend='touchend(${k})' ` : "ondblclick='showHint(this, " + k + ")'";
-        allSelected &= sel;
-        s += "<div id='itemTd" + k + "' " + dblclick  + " onclick='itemClicked(" + k + ")' class='" + (sel ? "itemSel" : "itemUnsel") + " borderedContainer' title='" + algsInformation[k]["name"] + "'>" +
-            `<img oncontextmenu='return false;' class='caseImage' id='sel${k}' src='${blobUrls[k]}' ></div>`;
-        console.log(blobUrls);
-        console.log("this is s");
-        console.log(s);
-   // }
+    //  for (var j = 0; j < indeces.length; j++) {
+    // var i = indeces[j]; // case number
+    // k is now i 
+    var sel = (selCases.indexOf(k) != -1);
+    var dblclick = isMobile() ? ` ontouchstart='touchstart(event, () => {console.log("test"); showHint(null, ${k})})' ontouchend='touchend(${k})' ` : "ondblclick='showHint(this, " + k + ")'";
+    allSelected &= sel;
+    s += "<div id='itemTd" + k + "' " + dblclick + " onclick='itemClicked(" + k + ")' class='" + (sel ? "itemSel" : "itemUnsel") + " borderedContainer' title='" + algsInformation[k]["name"] + "'>" +
+        `<img oncontextmenu='return false;' class='caseImage' id='sel${k}' src='${blobUrls[k]}' ></div>`;
+    // }
     s = "<div class='colFlex' style='width: fit-content'> <div class='borderedContainer itemUnsel'" + s;
     s += "</div></div>";
-    console.log("from outputAlgs");
-    console.log(s);
     document.getElementById("cases_selection").innerHTML += s;
     selCases = [];
     return s;
 }
 
 function initSelection() {
-    console.log("GENNING BUTTONS");
-
     const container = document.querySelector(".borderedContainer");
 
     const addGroupContainer = document.createElement('div');
@@ -48,8 +41,8 @@ function initSelection() {
     addCasesToGroup.id = 'actg';
     addCasesToGroup.onclick = createGroup;
     addGroupContainer.appendChild(addCasesToGroup);
-//groups^        
-//SETS
+    //groups^        
+    //SETS
     const addSetContainer = document.createElement('div');
     addSetContainer.id = "addSetContainer";
     addSetContainer.classList = "settingsEntry";
@@ -97,37 +90,43 @@ function initSelection() {
     downloadButton.id = "dlbtn";
     downloadButton.textContent = "Download sheet"
     downloadButton.onclick = () => exportXLSX();
-    document.getElementById("progress").parentElement.appendChild(downloadButton);
+    document.getElementById("progress").appendChild(downloadButton);
 
     const fileNameBox = document.createElement('input');
     fileNameBox.id = "fileNameEntry";
     fileNameBox.placeholder = "File Name";
-    document.getElementById("progress").parentElement.appendChild(fileNameBox);
+    document.getElementById("progress").appendChild(fileNameBox);
 
     const allDeleteButton = document.createElement('button');
     allDeleteButton.id = "deleteAllBtn";
     allDeleteButton.textContent = "Delete All Cases";
     allDeleteButton.onclick = () => {
         if (confirm("Are you sure you want to delete all cases?")) {
+            localStorage.clear();
             location.reload(true);
         }
     };
-    document.getElementById("progress").parentElement.appendChild(allDeleteButton);
-
+    document.getElementById("progress").appendChild(allDeleteButton);
+/*
     const saveButton = document.getElementById('saveBtn');
     saveButton.onclick = () => {
-        save();
+        saveToCsv();
         alert("Selection saved successfully!");
     };
+
+    const saveToLocal = document.getElementById("saveLocalBtn");
+    saveToLocal.onclick = () => {
+        saveLocal();
+    } */
+
     return;
 }
 
 
-function createGroup(preGroupName = null){
-    console.log("creating groups");
+function createGroup(preGroupName = null) {
     let customGroupName = "";
-    if (quickGenBool) {customGroupName = preGroupName} else {customGroupName = document.getElementById("createGroupName").value};
-    if (!customGroupName) {return};
+    if (quickGenBool) { customGroupName = preGroupName } else { customGroupName = document.getElementById("createGroupName").value };
+    if (!customGroupName) { return };
 
     let selCasesArr = []; //these are the cases that are selected
 
@@ -141,7 +140,7 @@ function createGroup(preGroupName = null){
     deleteGroupIcon.className = "material-symbols-outlined deleteButton"
     deleteGroupIcon.innerHTML = "delete";
     deleteGroupIcon.onclick = (e) => { // prevent triggering groupBar onclick
-        e.stopPropagation(); 
+        e.stopPropagation();
         deleteGroup(customGroupName);
     };
     groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
@@ -158,10 +157,9 @@ function createGroup(preGroupName = null){
     groupContainer.appendChild(casesContainer);
 
     if (!quickGenBool) {
-        console.log("YESSSSSS I SHOULD BE HERE");
-        for (i = 1; i <= Object.keys(algsInformation).length; i++){
+        for (i = 1; i <= Object.keys(algsInformation).length; i++) {
             let caseToCheck = document.getElementById("itemTd" + i);
-            if (caseToCheck.classList.contains("itemSel")){ //gets cases
+            if (caseToCheck.classList.contains("itemSel")) { //gets cases
 
                 caseToCheck.className = 'borderedContainer itemUnsel pad'; //unselect after adding to group
                 var index = selCases.indexOf(i);
@@ -170,8 +168,8 @@ function createGroup(preGroupName = null){
                 let caseElement = document.getElementById("itemTd" + i); //the case itself
                 let wrapper = caseElement.parentElement; //this gives the weird spacing issue
                 caseElement.classList.remove("pad");
-                casesContainer.appendChild(caseElement); 
-                
+                casesContainer.appendChild(caseElement);
+
                 selCasesArr.push(i);
                 algsGroups[customGroupName] = selCasesArr; //enter into algsGroups
                 algsInformation[i].group = customGroupName; //enter into algsinfo
@@ -183,10 +181,11 @@ function createGroup(preGroupName = null){
         }
     } else {
         for (let selectedCase of algsGroups[preGroupName]) {
+            let wrapper;
             let caseToCheck = document.getElementById("itemTd" + selectedCase);
-            let wrapper = caseToCheck.parentElement; //this gives the weird spacing issue
+            if (caseToCheck.parentElement) { wrapper = caseToCheck.parentElement }; //this gives the weird spacing issue
             caseToCheck.classList.remove("pad");
-            casesContainer.appendChild(caseToCheck); 
+            casesContainer.appendChild(caseToCheck);
 
             wrapper.remove();
         }
@@ -195,9 +194,9 @@ function createGroup(preGroupName = null){
     return;
 }
 
-function createSet(preSetName = null){
+function createSet(preSetName = null) {
     let customSetName = ""
-    if (quickGenBool) {customSetName = preSetName} else {customSetName = createSetName.value};
+    if (quickGenBool) { customSetName = preSetName } else { customSetName = createSetName.value };
     let selGroupsArr = [];
     let setAlgCount = 0;
 
@@ -214,20 +213,19 @@ function createSet(preSetName = null){
     deleteSetIcon.className = "material-symbols-outlined deleteButton"
     deleteSetIcon.innerHTML = "delete";
     deleteSetIcon.onclick = (e) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         deleteSet(customSetName);
     };
     setBar.appendChild(deleteSetIcon);
     setContainer.appendChild(setBar);
 
-    if (!quickGenBool) {    
+    if (!quickGenBool) {
         let groupBarEl;
-        console.log("YESSSSSS I SHOULD BE HERE");
         for (i = 1; i <= Object.keys(algsGroups).length; i++) {
             if (Object.keys(algsGroups)[i - 1] !== " " && Object.keys(algsGroups)[i - 1] !== "undefined") {
                 groupBarEl = document.getElementById("groupBar" + Object.keys(algsGroups)[i - 1]);
-            } else {continue;}
-            if (groupBarEl.classList.contains("itemSel")){
+            } else { continue; }
+            if (groupBarEl.classList.contains("itemSel")) {
                 let selectedGroupName = Object.keys(algsGroups)[i - 1];
                 selGroupsArr.push(selectedGroupName); //preparing the algsets for algsets object
 
@@ -238,14 +236,14 @@ function createSet(preSetName = null){
 
                 for (selectedCase of algsGroups[selectedGroupName]) {
                     let selectedEl = document.getElementById("itemTd" + selectedCase);
-                    if(selectedEl.classList.contains("itemSel")){
+                    if (selectedEl.classList.contains("itemSel")) {
                         selectedEl.classList.remove("itemSel");
                         selectedEl.classList.add("itemUnsel"); //unselect individual cases after moving
                     }
                     algsInformation[selectedCase]["algset"] = customSetName;
                 }
 
-                for (j = 1; j <= algsGroups[selectedGroupName].length; j++){
+                for (j = 1; j <= algsGroups[selectedGroupName].length; j++) {
                     let CaseNumber = algsGroups[selectedGroupName][j];
                     var index = selCases.indexOf(CaseNumber);
                     selCases.splice(index, 1);
@@ -261,9 +259,9 @@ function createSet(preSetName = null){
             let selectedGroupContainerId = "groupContainer" + currentGroup;
             setContainer.appendChild(document.getElementById(selectedGroupContainerId));
 
-            for (j = 1; j <= algsGroups[currentGroup].length; j++){
-                    setAlgCount++;
-                } //removes cases after selecting
+            for (j = 1; j <= algsGroups[currentGroup].length; j++) {
+                setAlgCount++;
+            } //removes cases after selecting
         }
         selectedAlgSets[customSetName] = false;
     }
@@ -277,48 +275,41 @@ function createSet(preSetName = null){
     return;
 }
 
-function deleteGroup(groupName){ //as the name suggests it removes the group bar and cases
-    if(confirm("Are you sure you want to remove this group?")){
+function deleteGroup(groupName) { //as the name suggests it removes the group bar and cases
+    if (confirm("Are you sure you want to remove this group?")) {
         let groupContainerToDelete = document.getElementById("groupContainer" + groupName);
 
         for (let caseNumber of algsGroups[groupName]) { //put cases back into unsorted area
             let caseElement = document.getElementById("itemTd" + caseNumber);
-            console.log(caseElement.className);
             caseElement.className = "itemUnsel borderedContainer";
-            console.log(caseElement.className);
             let wrapper = document.createElement("div");
-            wrapper.className = "colFlex"; 
+            wrapper.className = "colFlex";
             wrapper.style.width = "fit-content";
             wrapper.appendChild(caseElement); //put it back cuz I'm dumb
 
-            console.log("in for loop");
             let firstElement = document.getElementById("cases_selection").firstChild;
-            console.log("this is wrapper");
-            console.log(wrapper);
             document.getElementById("cases_selection").insertBefore(wrapper, firstElement);
 
-            for (j = 1; j <= algsGroups[groupName].length; j++){
-                    let CaseNumberFor = algsGroups[groupName][j];
-                    var index = selCases.indexOf(CaseNumberFor);
-                    selCases.splice(index, 1);
-                } //removes cases after selecting
+            for (j = 1; j <= algsGroups[groupName].length; j++) {
+                let CaseNumberFor = algsGroups[groupName][j];
+                var index = selCases.indexOf(CaseNumberFor);
+                selCases.splice(index, 1);
+            } //removes cases after selecting
         }
 
         groupContainerToDelete.remove();
     }
 }
 
-function deleteSet (setName){
-    if(confirm("Are you sure you want to remove this set?")){
+function deleteSet(setName) {
+    if (confirm("Are you sure you want to remove this set?")) {
         let setBarToDelete = document.getElementById("setBar" + setName);
         let containerToDelete = document.getElementById("setContainer" + setName);
         let setSelectorToDelete = document.getElementById(setName + "selector");
 
         let childrenArr = Array.from(containerToDelete.children);
-        for (let containedGroup of childrenArr){
-            console.log("checking " + containedGroup);
+        for (let containedGroup of childrenArr) {
             if (containedGroup !== setBarToDelete) {//avoids the problem of moving setBar too
-                console.log("deleting " + containedGroup);
                 document.getElementById("cases_selection").appendChild(containedGroup);
             }
         }
@@ -361,8 +352,8 @@ function selectAlgset(algset, algCount) {
     var allSelected = selectedCount == algsetIds.length;
     selectedAlgSets[algset] = selectedCount != 0 | !selectedAlgSets[algset];
     saveSelection();
-    
-    
+
+
 }
 
 function selectAllCases() {
@@ -421,7 +412,7 @@ async function exportXLSX() {
     console.log("genning export");
     const workbook = new ExcelJS.Workbook();
     let fileName = document.getElementById("fileNameEntry").value;
-    for (let set of Object.keys(algsets)){
+    for (let set of Object.keys(algsets)) {
         console.log("exporting set: " + set)
         groupCount = 0;
         const setSheet = workbook.addWorksheet(set);
@@ -442,7 +433,7 @@ async function exportXLSX() {
                 setSheet.getCell(groupCount * 7 + 2, caseCount).value = caseName;
                 for (i = 0; i < caseAlgs.length; i++) {
                     let caseAlg = caseAlgs[i];
-                    if (caseAlg !== "" ) {
+                    if (caseAlg !== "") {
                         setSheet.getCell(groupCount * 7 + 3 + i, caseCount).value = caseAlg;
                     }
                 }
@@ -464,7 +455,7 @@ async function exportXLSX() {
 
                 setSheet.addImage(imageId, {
                     tl: { col: caseCount - 1, row: groupCount * 7 },
-                    ext: { width: 156, height: 93.675},
+                    ext: { width: 156, height: 93.675 },
                 });
 
                 caseCount++;
@@ -475,14 +466,14 @@ async function exportXLSX() {
 
     //const sheet = workbook.addWorksheet("Sheet1");
 
-/*
-    // 2) Write "hello world" to A1 (row 1, col 1)
-    sheet.getCell(1, 1).value = "hello world";
-
-    // Sheet 2
-    const sheet2 = workbook.addWorksheet("Sheet2");
-    sheet2.getCell(1, 1).value = "This is Sheet 2";
-*/
+    /*
+        // 2) Write "hello world" to A1 (row 1, col 1)
+        sheet.getCell(1, 1).value = "hello world";
+    
+        // Sheet 2
+        const sheet2 = workbook.addWorksheet("Sheet2");
+        sheet2.getCell(1, 1).value = "This is Sheet 2";
+    */
     // 3) Generate bytes and download
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
@@ -500,40 +491,38 @@ async function exportXLSX() {
 }
 
 async function svgToPngBase64(svgString, width = 156, height = 93.675) {
-  return new Promise((resolve, reject) => {
-    // 1. Create an Image object
-    const img = new Image();
-    const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(svgBlob);
+    return new Promise((resolve, reject) => {
+        // 1. Create an Image object
+        const img = new Image();
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(svgBlob);
 
-    img.onload = () => {
-      // 2. Draw onto a canvas
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
+        img.onload = () => {
+            // 2. Draw onto a canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
 
-      // 3. Convert to base64 PNG
-      const pngBase64 = canvas.toDataURL('image/png');
-      URL.revokeObjectURL(url);
-      resolve(pngBase64);
-    };
+            // 3. Convert to base64 PNG
+            const pngBase64 = canvas.toDataURL('image/png');
+            URL.revokeObjectURL(url);
+            resolve(pngBase64);
+        };
 
-    img.onerror = reject;
-    img.src = url;
-  });
+        img.onerror = reject;
+        img.src = url;
+    });
 }
 
-function save () {
+function saveToCsv() {
     var csv = "algset, group, name, a\n";
-    Object.keys(algsInformation).forEach((num) => {  
+    Object.keys(algsInformation).forEach((num) => {
         csv += algsInformation[num].algset + ", " + algsInformation[num].group + ", " + algsInformation[num].name + ", " + algsInformation[num].a.join(" ") + "\n";
-    });  
+    });
 
-    console.log(csv);
-
-    var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     var link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.setAttribute("download", "selection.csv");
@@ -541,4 +530,12 @@ function save () {
     link.click();
     document.body.removeChild(link);
     console.log("Selection saved successfully!");
+}
+
+function saveLocally() {
+    let algsInfoStr = JSON.stringify(algsInformation);
+    localStorage.setItem("algsInfo", algsInfoStr);
+
+    let scramblesStr = JSON.stringify(scramblesMap);
+    localStorage.setItem("scrambles", scramblesStr);
 }

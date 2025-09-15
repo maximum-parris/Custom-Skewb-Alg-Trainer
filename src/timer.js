@@ -301,8 +301,6 @@ function renderHint(i) {
     document.getElementById("boxTitle").innerHTML = `${algsInformation[i]['name']}`;
     var longestAlgLength = 0;
     var currentAlgs = algsInformation[i]["a"]
-    console.log("this is currentAlgs");
-    console.log(currentAlgs);
     if (typeof currentAlgs === "string") {
         currentAlgs = currentAlgs.split(",");
     }
@@ -315,7 +313,6 @@ function renderHint(i) {
     for (const alg of currentAlgs) {
         longestAlgLength = Math.max(longestAlgLength, alg.length)
     }
-    console.log(currentAlgs.join("&#10;"));
     let algsStr = `<div class='colFlex' style='width: 100%'>
     <label for='algorithmsInput'>Algorithms:</label>
     <textarea id='algorithmsInput' disabled rows='5' cols='30'>${currentAlgs.join("\n")}</textarea>

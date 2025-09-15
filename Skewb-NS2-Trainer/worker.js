@@ -402,7 +402,6 @@ function calcState(state, subPuzzles, showPostAdj) {
                     scrambleList.push(solution);
                     // console.log(scrambleList);
                     if (numSolutions === 20) {
-                        console.log("finally 20 " + scrambleList);
                         postMessage({ value: 0, type: "set-depth" })
                         postMessage({ value: scrambleList, type: "scrambles" });
                     } else {
@@ -410,7 +409,6 @@ function calcState(state, subPuzzles, showPostAdj) {
                     }
                 }
             } else {
-                console.log("over 20 algs");
                 /* postMessage({ value: { index: solutionIndex, setup: stateStr, num: caseNum }, type: "next-state" });
                  calcState(state, subPuzzles, input.showPost);
                  solutionIndex++; */
