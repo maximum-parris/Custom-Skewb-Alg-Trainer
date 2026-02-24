@@ -43,9 +43,13 @@ function confirmUnsel(i) {
 function displayPracticeInfo() {
     var caseCount = selCases.length;
     var s = "";
-    if (recapArray.length == 0)
-        s += "<b><a onclick='changeMode(\"recap\")'>Train</a> " + caseCount + " Cases</b>";
-    else {
+    if (recapArray.length == 0) {
+        if (manualReviewCases.length > 0) {
+            s += "<b>Learn " + recapArray.length + " Cases</b>";
+        } else {
+            s += "<b><a onclick='changeMode(\"recap\")'>Train</a> " + caseCount + " Cases</b>";
+        }
+    } else {
         s += "<b><a onclick='changeMode(\"train\")'>Recap</a> " + recapArray.length + " Cases</b>";
     }
 
@@ -97,7 +101,11 @@ function generateScramble() {
             caseNum = randomElement(selCases);
     } else {
         if (manualReviewCases.length > 0) {
-            caseNum = randomElement(manualReviewCases);
+            recapArray = [...manualReviewCases];
+            manualReviewCases = [];               // clear original so they don't get duplicated
+            caseNum = randomElement(recapArray); // pick the first case for this round
+            const index = recapArray.indexOf(caseNum);
+            recapArray.splice(index, 1);         // remove from recapArray so it's not repeated
         } else {
             caseNum = randomElement(recapArray);
             const index = recapArray.indexOf(caseNum);
