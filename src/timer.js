@@ -6,6 +6,8 @@ var lastScramble = "";
 var lastCase = 0;
 var hintCase = 0;
 var customAlgs = {};
+var manualReviewCases = [];
+var lastSolveMarkedWrong = false;
 
 /// invokes generateScramble() and sets scramble string
 function showScramble() {
@@ -57,7 +59,7 @@ function generateScramble() {
     displayPracticeInfo();
     // get random case
     var caseNum = 0;
-    if (recapArray.length == 0) { // train
+    if (recapArray.length == 0 && manualReviewCases.length == 0) { // train
         if (window.history.state == 'recap') {
             window.history.replaceState('train', '', baseUrl + "?train")
         }
@@ -93,12 +95,14 @@ function generateScramble() {
 
         else // random choice of next case
             caseNum = randomElement(selCases);
-    } else { // recap
-        // select the case
-        caseNum = randomElement(recapArray);
-        // remove it from the array
-        const index = recapArray.indexOf(caseNum);
-        recapArray.splice(index, 1);
+    } else {
+        if (manualReviewCases.length > 0) {
+            caseNum = randomElement(manualReviewCases);
+        } else {
+            caseNum = randomElement(recapArray);
+            const index = recapArray.indexOf(caseNum);
+            recapArray.splice(index, 1);
+        }
     }
     var alg = randomElement(window.scramblesMap[caseNum]);
     var preMove = randomElement(preMoves);
@@ -194,6 +198,8 @@ function timerSetReady() {
 }
 
 function timerStart() {
+    lastSolveMarkedWrong = false;
+
     var d = new Date();
     startMilliseconds = d.getTime();
     running = true;
@@ -224,7 +230,23 @@ function escapeHtml(text) {
 // invoked right after the timer stopped
 function appendStats() {
     // assuming the time can be grabbed from timer label, and the case - window.lastCase
-    window.timesArray.push(makeResultInstance());
+    /* window.timesArray.push(makeResultInstance());
+    displayStats(); */
+
+
+    var result = makeResultInstance();
+    window.timesArray.push(result);
+
+    var caseNum = result.case;
+
+    // If this case is already in review
+    // and user did NOT press Shift this time,
+    // remove it from review (solved correctly)
+    if (manualReviewCases.includes(caseNum) && !lastSolveMarkedWrong) {
+        manualReviewCases = manualReviewCases.filter(c => c !== caseNum);
+        console.log("Case", caseNum, "removed from review");
+    }
+
     displayStats();
 }
 
@@ -325,6 +347,7 @@ function renderHint(i) {
 }
 
 function showHint(element, i) {
+    recapAgain(i);     // mark the current case, not lastCase
     renderHint(i);
     hintCase = i;
     openDialog('hintWindow');
@@ -468,4 +491,21 @@ function timeStringToMseconds(s) {
     if (isNaN(secs))
         return -1;
     return Math.round(secs * 100);
+}
+
+
+document.addEventListener("keyup", function (event) {
+    if (event.key === "Shift") {
+        recapAgain();
+    }
+});
+
+function recapAgain(caseNum = window.lastCase) {
+    if (!caseNum) return;
+
+    lastSolveMarkedWrong = true;
+
+    if (!manualReviewCases.includes(caseNum)) {
+        manualReviewCases.push(caseNum);
+    }
 }
