@@ -121,7 +121,7 @@ function main() {
         if (event.code != "ShiftLeft") // shift
             allowed = false;
 
-        if (running) {
+        if (running && !event.key.startsWith("Shift")) {
             // stop timer on any button
             timerStop();
             return;
