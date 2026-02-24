@@ -6,9 +6,11 @@ var lastScramble = "";
 var lastCase = 0;
 var hintCase = 0;
 var customAlgs = {};
-var manualReviewCases = [];
-var lastSolveMarkedWrong = false;
-var learningMode = false;
+
+// New variables for Learn mode
+var wrongCases = [];           // Cases marked as wrong that need practice
+var currentMode = 'train';     // 'train', 'recap', or 'learn'
+var currentLearnCase = null;   // Track current case in learn mode to know if it was solved correctly
 
 /// invokes generateScramble() and sets scramble string
 function showScramble() {
@@ -44,13 +46,15 @@ function confirmUnsel(i) {
 function displayPracticeInfo() {
     var caseCount = selCases.length;
     var s = "";
-    if (recapArray.length == 0) {
-        s += "<b><a onclick='changeMode(\"recap\")'>Train</a> " + caseCount + " Cases</b>";
+    
+    if (currentMode == 'learn') {
+        s += "<b><a onclick='stopLearnMode()'>Stop Learning</a> " + wrongCases.length + " Wrong Cases</b>";
+    } else if (recapArray.length > 0) {
+        s += "<b>Recap " + recapArray.length + " Cases</b>";
     } else {
-        if (learningMode == false) {
-            s += "<b><a onclick='changeMode(\"train\")'>Recap</a> " + recapArray.length + " Cases</b>";
-        } else {
-            s += "<b>Learn " + recapArray.length + " Cases</b>";
+        s += "<b>Train " + caseCount + " Cases</b>";
+        if (wrongCases.length > 0) {
+            s += " | <a onclick='startLearnMode()'>Learn " + wrongCases.length + " Wrong</a> | <a onclick='clearWrongCases()'>Clear</a>";
         }
     }
 
@@ -61,13 +65,39 @@ function generateScramble() {
     if (window.lastScramble != "")
         document.getElementById("last_scramble").innerHTML = `<span>Last scramble: ${window.lastScramble}` +
             ` <span onclick='showHint(this,${lastCase})' class='caseNameStats'>(${algsInformation[lastCase]["name"]})</span></span><span class='material-symbols-outlined inlineButton' onclick='confirmUnsel(${lastCase})'>close</span>`;
+    
     displayPracticeInfo();
+    
     // get random case
     var caseNum = 0;
-    if (recapArray.length == 0 && manualReviewCases.length == 0) { // train
-        if (window.history.state == 'recap') {
-            window.history.replaceState('train', '', baseUrl + "?train")
+    
+    if (currentMode == 'learn' && wrongCases.length > 0) {
+        // LEARN MODE: Practice wrong cases
+        caseNum = randomElement(wrongCases);
+        // Store current learn case to track if solved correctly
+        currentLearnCase = caseNum;
+        // Don't remove from wrongCases yet - only remove when solved correctly
+    }
+    else if (recapArray.length > 0) {
+        // RECAP MODE: Go through each case once
+        currentMode = 'recap';
+        caseNum = randomElement(recapArray);
+        // Remove it from recap array
+        const index = recapArray.indexOf(caseNum);
+        recapArray.splice(index, 1);
+        
+        // If recap is finished, go to learn mode if there are wrong cases, otherwise train
+        if (recapArray.length == 0) {
+            if (wrongCases.length > 0) {
+                currentMode = 'learn';
+            } else {
+                currentMode = 'train';
+            }
         }
+    } else {
+        // TRAIN MODE: Random cases forever
+        currentMode = 'train';
+        
         if (currentSettings['weightedChoice']) {
             var selCasesCounts = []; // count how often each case has appeared already
             for (var i = 0; i < selCases.length; i++) {
@@ -94,35 +124,12 @@ function generateScramble() {
                     selCaseWeights.push(selCaseWeights[i - 1] + 3.5 ** (- (selCasesCounts[i] - expectedCount)));
             }
             caseNum = weightedRandomElement(selCases, selCaseWeights)
-
-            //console.log(selCasesCounts, expectedCount, selCaseWeights, caseNum);
         }
-
-        else // random choice of next case
+        else { // random choice of next case
             caseNum = randomElement(selCases);
-    } else {
-        if (manualReviewCases.length > 0) {
-            learningMode = true;                  // <-- correct assignment
-            recapArray = [...manualReviewCases];  // copy for iteration
-            caseNum = randomElement(recapArray); // pick one
-            const index = recapArray.indexOf(caseNum);
-            recapArray.splice(index, 1);         // remove from recapArray so it’s not repeated
-
-            // also remove from manualReviewCases so the Learn count decreases
-            const reviewIndex = manualReviewCases.indexOf(caseNum);
-            if (reviewIndex !== -1) manualReviewCases.splice(reviewIndex, 1);
-        } else {
-            caseNum = randomElement(recapArray);
-            const index = recapArray.indexOf(caseNum);
-            recapArray.splice(index, 1);
-
-            // optional: if learningMode, also remove from manualReviewCases in general
-            if (learningMode) {
-                const reviewIndex = manualReviewCases.indexOf(caseNum);
-                if (reviewIndex !== -1) manualReviewCases.splice(reviewIndex, 1);
-            }
         }
     }
+    
     var alg = randomElement(window.scramblesMap[caseNum]);
     var preMove = randomElement(preMoves);
     if (preMove != "") preMove += " ";
@@ -148,6 +155,9 @@ var running = false; var waiting = false;
 var timer = null;
 var timerActivatingButton = 32; // 17 for ctrl
 var timeout;
+
+// Track if current solve was marked as wrong
+var currentSolveMarkedWrong = false;
 
 function msToHumanReadable(duration) {
     if (!Number.isFinite(duration))
@@ -207,7 +217,17 @@ function timerStop() {
     timer.style.color = "#850000";
 
     appendStats();
+    
+    // If in learn mode and the solve wasn't marked wrong, consider it correct
+    if (currentMode == 'learn' && !currentSolveMarkedWrong && currentLearnCase) {
+        markCurrentCaseCorrect();
+    }
+    
     showScramble();
+    
+    // Reset flags for next solve
+    currentSolveMarkedWrong = false;
+    currentLearnCase = null;
 }
 
 function timerSetReady() {
@@ -217,8 +237,6 @@ function timerSetReady() {
 }
 
 function timerStart() {
-    lastSolveMarkedWrong = false;
-
     var d = new Date();
     startMilliseconds = d.getTime();
     running = true;
@@ -230,6 +248,86 @@ function timerAfterStop() {
     timer.style.color = currentSettings['colors']['--text'];
 }
 
+// Mark current case as wrong (called by Shift key)
+function markCurrentCaseWrong() {
+    if (lastCase && !currentSolveMarkedWrong) {
+        currentSolveMarkedWrong = true;
+        
+        // Only add if not already in wrongCases
+        if (!wrongCases.includes(lastCase)) {
+            wrongCases.push(lastCase);
+            console.log(`Case ${lastCase} marked as wrong`);
+            
+            // Visual feedback
+            const scrambleEl = document.getElementById("scramble");
+            if (scrambleEl) {
+                scrambleEl.style.backgroundColor = "#ffcccc";
+                setTimeout(() => {
+                    scrambleEl.style.backgroundColor = "";
+                }, 500);
+            }
+        }
+        
+        displayPracticeInfo();
+    }
+}
+
+// Mark current case as correct (removes from wrongCases in learn mode)
+function markCurrentCaseCorrect() {
+    if (currentMode == 'learn' && currentLearnCase) {
+        const index = wrongCases.indexOf(currentLearnCase);
+        if (index !== -1) {
+            wrongCases.splice(index, 1);
+            console.log(`Case ${currentLearnCase} solved correctly! Removed from wrong cases.`);
+            
+            // Visual feedback for correct solve
+            const scrambleEl = document.getElementById("scramble");
+            if (scrambleEl) {
+                scrambleEl.style.backgroundColor = "#ccffcc";
+                setTimeout(() => {
+                    scrambleEl.style.backgroundColor = "";
+                }, 500);
+            }
+        }
+        
+        // If all wrong cases are solved, go back to train mode
+        if (wrongCases.length === 0) {
+            currentMode = 'train';
+            setTimeout(() => {
+                alert("Great job! You've mastered all wrong cases!");
+            }, 100);
+        }
+        
+        displayPracticeInfo();
+    }
+}
+
+// Start learning mode with all wrong cases
+function startLearnMode() {
+    if (wrongCases.length > 0) {
+        currentMode = 'learn';
+        showScramble(); // Generate first learn scramble
+        displayPracticeInfo();
+    }
+}
+
+// Stop learning mode and return to training
+function stopLearnMode() {
+    currentMode = 'train';
+    showScramble();
+    displayPracticeInfo();
+}
+
+// Clear all wrong cases
+function clearWrongCases() {
+    if (confirm("Clear all marked wrong cases?")) {
+        wrongCases = [];
+        if (currentMode == 'learn') {
+            currentMode = 'train';
+        }
+        displayPracticeInfo();
+    }
+}
 
 // http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
 function escapeHtml(text) {
@@ -244,28 +342,9 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, function (m) { return map[m]; });
 }
 
-/// [0: ResultInstance, 1: ResultInstance, ...]
-
 // invoked right after the timer stopped
 function appendStats() {
-    // assuming the time can be grabbed from timer label, and the case - window.lastCase
-    /* window.timesArray.push(makeResultInstance());
-    displayStats(); */
-
-
-    var result = makeResultInstance();
-    window.timesArray.push(result);
-
-    var caseNum = result.case;
-
-    // If this case is already in review
-    // and user did NOT press Shift this time,
-    // remove it from review (solved correctly)
-    if (manualReviewCases.includes(caseNum) && !lastSolveMarkedWrong) {
-        manualReviewCases = manualReviewCases.filter(c => c !== caseNum);
-        console.log("Case", caseNum, "removed from review");
-    }
-
+    window.timesArray.push(makeResultInstance());
     displayStats();
 }
 
@@ -274,7 +353,6 @@ function removeTime(i) {
     window.timesArray.splice(i, 1);
     displayStats();
 }
-
 
 function updateInstancesIndeces() {
     for (var i = 0; i < window.timesArray.length; i++)
@@ -334,7 +412,6 @@ function editAlg() {
         saveAlgs()
         return
     }
-
 }
 
 function renderHint(i) {
@@ -366,9 +443,16 @@ function renderHint(i) {
 }
 
 function showHint(element, i) {
-    recapAgain(i);     // mark the current case, not lastCase
     renderHint(i);
     hintCase = i;
+    
+    // Mark this case as wrong when hint is requested
+    if (!wrongCases.includes(i)) {
+        wrongCases.push(i);
+        console.log(`Case ${i} marked as wrong via hint`);
+        displayPracticeInfo();
+    }
+    
     openDialog('hintWindow');
 }
 
@@ -411,7 +495,6 @@ function uploadCustomAlgs() {
         } catch (e) {
             console.error(e);
         }
-
     }
 
     fr.readAsText(files.item(0));
@@ -429,8 +512,6 @@ function showCaseTimeDetails(caseNum) {
 }
 
 /// fills resultInfo container with info about given result instance
-/// \param r result instsnce (see makeResultInstance)
-/// set \param r to null if you want to clear result info
 /// displays averages etc.
 /// fills "times" right panel with times and last result info
 function displayStats() {
@@ -472,8 +553,11 @@ function displayStats() {
             meanForCase *= i / (i + 1);
             meanForCase += resultsByCase[case_][i]["ms"] / (i + 1);
         }
-        // s += `<div class='timeEntry'><div><span class='caseNameStats' onclick='showHint(this, ${keys[j]})'>${algsInfo[case_]["algset"]} ${algsInfo[case_]["name"]}</span> (⌀${msToHumanReadable(meanForCase)}):</div> ${timesString} </div>`;
-        s += `<div class='timeEntry'><span class='caseNameStats' onclick='showHint(this, ${keys[j]})'>${algsInformation[case_]["algset"]} ${algsInformation[case_]["name"]}</span>`
+        
+        // Add indicator if case is marked as wrong
+        var wrongIndicator = wrongCases.includes(parseInt(case_)) ? ' ⚠️' : '';
+        
+        s += `<div class='timeEntry'><span class='caseNameStats' onclick='showHint(this, ${keys[j]})'>${algsInformation[case_]["algset"]} ${algsInformation[case_]["name"]}${wrongIndicator}</span>`
         s += ` <span class='caseNameStats' onclick=(showCaseTimeDetails(${case_}))>(#${resultsByCase[case_].length}, ⌀${msToHumanReadable(meanForCase)})</span></div>`;
     }
     el.innerHTML = s;
@@ -489,7 +573,7 @@ function makeResultInstance() {
 
     return {
         "time": currentTime,
-        "ms": timeStringToMseconds(currentTime) * 10, // *10 because current time 1.23 display only hundreths, not thousandth of a second
+        "ms": timeStringToMseconds(currentTime) * 10, // *10 because current time 1.23 display only hundreths
         "details": details,
         "index": index,
         "case": window.lastCase
@@ -512,19 +596,27 @@ function timeStringToMseconds(s) {
     return Math.round(secs * 100);
 }
 
-
-document.addEventListener("keyup", function (event) {
+// Add keyboard listener for Shift key
+document.addEventListener("keydown", function (event) {
     if (event.key === "Shift") {
-        recapAgain();
+        markCurrentCaseWrong();
     }
 });
 
-function recapAgain(caseNum = window.lastCase) {
-    if (!caseNum) return;
-
-    lastSolveMarkedWrong = true;
-
-    if (!manualReviewCases.includes(caseNum)) {
-        manualReviewCases.push(caseNum);
+// Initialize on page load
+window.onload = function() {
+    // Load wrong cases from localStorage if you want persistence
+    var savedWrongCases = loadLocal('wrongCases', '[]');
+    if (savedWrongCases) {
+        try {
+            wrongCases = JSON.parse(savedWrongCases);
+        } catch (e) {
+            wrongCases = [];
+        }
     }
-}
+    
+    // Save wrong cases when page unloads (optional)
+    window.addEventListener('beforeunload', function() {
+        saveLocal('wrongCases', JSON.stringify(wrongCases));
+    });
+};
