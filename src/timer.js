@@ -8,6 +8,7 @@ var hintCase = 0;
 var customAlgs = {};
 var manualReviewCases = [];
 var lastSolveMarkedWrong = false;
+var learningMode = false;
 
 /// invokes generateScramble() and sets scramble string
 function showScramble() {
@@ -44,13 +45,13 @@ function displayPracticeInfo() {
     var caseCount = selCases.length;
     var s = "";
     if (recapArray.length == 0) {
-        if (manualReviewCases.length > 0) {
-            s += "<b>Learn " + recapArray.length + " Cases</b>";
-        } else {
-            s += "<b><a onclick='changeMode(\"recap\")'>Train</a> " + caseCount + " Cases</b>";
-        }
+        s += "<b><a onclick='changeMode(\"recap\")'>Train</a> " + caseCount + " Cases</b>";
     } else {
-        s += "<b><a onclick='changeMode(\"train\")'>Recap</a> " + recapArray.length + " Cases</b>";
+        if (learningMode == false) {
+            s += "<b><a onclick='changeMode(\"train\")'>Recap</a> " + recapArray.length + " Cases</b>";
+        } else {
+            s += "<b>Learn " + recapArray.length + " Cases</b>";
+        }
     }
 
     document.getElementById("selInfo").innerHTML = s;
@@ -101,15 +102,25 @@ function generateScramble() {
             caseNum = randomElement(selCases);
     } else {
         if (manualReviewCases.length > 0) {
-            recapArray = [...manualReviewCases];
-            manualReviewCases = [];               // clear original so they don't get duplicated
-            caseNum = randomElement(recapArray); // pick the first case for this round
+            learningMode = true;                  // <-- correct assignment
+            recapArray = [...manualReviewCases];  // copy for iteration
+            caseNum = randomElement(recapArray); // pick one
             const index = recapArray.indexOf(caseNum);
-            recapArray.splice(index, 1);         // remove from recapArray so it's not repeated
+            recapArray.splice(index, 1);         // remove from recapArray so it’s not repeated
+
+            // also remove from manualReviewCases so the Learn count decreases
+            const reviewIndex = manualReviewCases.indexOf(caseNum);
+            if (reviewIndex !== -1) manualReviewCases.splice(reviewIndex, 1);
         } else {
             caseNum = randomElement(recapArray);
             const index = recapArray.indexOf(caseNum);
             recapArray.splice(index, 1);
+
+            // optional: if learningMode, also remove from manualReviewCases in general
+            if (learningMode) {
+                const reviewIndex = manualReviewCases.indexOf(caseNum);
+                if (reviewIndex !== -1) manualReviewCases.splice(reviewIndex, 1);
+            }
         }
     }
     var alg = randomElement(window.scramblesMap[caseNum]);
