@@ -71,7 +71,7 @@ function loadStorage() {
     algsInformation = JSON.parse(storedAlgsInfo);
   }
   let storedScramblesMap = localStorage.getItem("scrambles");
-  if (storedScramblesMap) {
+  if (storedScramblesMaps) {
     hasStoredInfo = true;
     scramblesMap = JSON.parse(storedScramblesMap);
 
