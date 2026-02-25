@@ -45,12 +45,14 @@ function displayPracticeInfo() {
     var caseCount = selCases.length;
     var learnCaseCount = incorrectAlgs.length
     var s = "";
-    if (recapArray.length == 0 && incorrectAlgs == 0)
+    if (recapArray.length == 0 && incorrectAlgs == 0) {
         s += "<b><a onclick='changeMode(\"recap\")'>Train</a> " + caseCount + " Cases</b>";
-    else if (recapArray.length == 0 && incorrectAlgs.length > 0) { 
+        recapFin = true;
+    } else if (recapArray.length == 0 && incorrectAlgs.length > 0) { 
         s += "<b><a onclick='changeMode(\"recap\")'>Learn</a> " + learnCaseCount + " Cases</b>";
     } else {
         s += "<b><a onclick='changeMode(\"train\")'>Recap</a> " + recapArray.length + " Cases</b>";
+        recapFin = false
     }
 
     document.getElementById("selInfo").innerHTML = s;
@@ -469,7 +471,7 @@ function makeResultInstance() {
         "details": details,
         "index": index,
         "case": window.lastCase
-    };
+    }
 }
 
 // converts timestring to milliseconds (int)
