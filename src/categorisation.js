@@ -211,16 +211,14 @@ function recomputeAllCategories() {
 // appendStats is defined in timer.js and called from timerStop()
 // We patch it after it's defined. Make sure categorisation.js loads after timer.js.
 const _cat_originalAppendStats = window.appendStats || appendStats;
+const _cat_originalCheckPostRender = window.checkPostRender || checkPostRender;
+
 window.appendStats = function () {
     _cat_originalAppendStats();
     moveCaseToSpeedGroup(window.lastCase);
 };
 
-// Also recompute all categories whenever the selection grid is re-rendered,
-// so badges survive page navigation back to the select screen.
-// renderSelection is defined in selection.js.
-const _cat_originalRenderSelection = window.renderSelection || renderSelection;
-window.renderSelection = function () {
-    _cat_originalRenderSelection();
+window.checkPostRender = function () {
+    _cat_originalCheckPostRender();
     recomputeAllCategories();
 };
