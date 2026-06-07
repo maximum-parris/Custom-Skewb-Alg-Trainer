@@ -1,180 +1,226 @@
-// ─── Speed Category Configuration ───────────────────────────────────────────
+// ─── Speed Category Configuration ────────────────────────────────────────────
+// Edit these thresholds (in real milliseconds) to taste
 const SPEED_THRESHOLDS = {
-    fast:   3000,   // avg ms < 3000 → Fast (green)
-    medium: 6000,   // avg ms < 6000 → Medium (orange)
-    // anything above → Slow (red)
+    fast:   3000,   // avg < 3.00s  → Fast
+    medium: 6000,   // avg < 6.00s  → Medium
+                    // avg >= 6.00s → Slow
 };
 
-const SPEED_CATEGORY_STYLE = {
-    fast:        { label: "F", color: "#2e7d32" },   // green
-    medium:      { label: "M", color: "#e65100" },   // orange
-    slow:        { label: "S", color: "#b71c1c" },   // red
-    unclassified:{ label: "",  color: "transparent" },
+// Group names that will appear as group bars in the selection grid
+const SPEED_GROUP_NAMES = {
+    fast:        "⚡ Fast",
+    medium:      "🟠 Medium",
+    slow:        "🔴 Slow",
+    unclassified: "❓ Unclassified",
+};
+
+// Colours for the group bars (background)
+const SPEED_GROUP_COLORS = {
+    fast:         "#1b5e20",
+    medium:       "#e65100",
+    slow:         "#b71c1c",
+    unclassified: "#424242",
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Returns "fast" | "medium" | "slow" | "unclassified" for a given case number */
-function getCaseCategory(caseNum) {
-    const solves = window.timesArray.filter(r => r["case"] === caseNum);
-    if (solves.length === 0) return "unclassified";
+// Track which speed-category group containers exist in the DOM
+const _speedGroupsCreated = new Set();
 
-    // r["ms"] is stored as ms*10 in makeResultInstance — divide back to get true ms
-    const avgMs = solves.reduce((sum, r) => sum + r["ms"], 0) / solves.length / 10;
+// Track which category each case is currently in so we only move when it changes
+const _caseCategoryCache = {};
 
-    if (avgMs < SPEED_THRESHOLDS.fast)   return "fast";
-    if (avgMs < SPEED_THRESHOLDS.medium) return "medium";
-    return "slow";
-}
+// ─── Core helpers ─────────────────────────────────────────────────────────────
 
-/** Returns the true average ms for a case (correcting for the *10 storage factor) */
+/**
+ * Returns the true average solve time in milliseconds for a given case.
+ * r["ms"] = timeStringToMseconds(timeStr) * 10
+ * timeStringToMseconds returns hundredths of a second (e.g. 1.91s → 191)
+ * So r["ms"] = 1910 for a 1.91s solve. Divide by 10 to get real ms.
+ */
 function getCaseTrueAvgMs(caseNum) {
     const solves = window.timesArray.filter(r => r["case"] === caseNum);
     if (solves.length === 0) return null;
     return solves.reduce((sum, r) => sum + r["ms"], 0) / solves.length / 10;
 }
 
-/** Renders or updates the speed badge on a case's grid tile */
-function updateCaseBadge(caseNum) {
-    const tile = document.getElementById("itemTd" + caseNum);
-    if (!tile) return;
-
-    const category = getCaseCategory(caseNum);
-    const { label, color } = SPEED_CATEGORY_STYLE[category];
-
-    tile.style.position = "relative";
-
-    const badgeId = "speedBadge" + caseNum;
-    let badge = document.getElementById(badgeId);
-
-    if (!badge) {
-        badge = document.createElement("div");
-        badge.id = badgeId;
-        badge.style.cssText = `
-            position: absolute;
-            bottom: 3px;
-            right: 3px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            font-size: 8px;
-            font-weight: bold;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 10;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-        `;
-        tile.appendChild(badge);
-    }
-
-    badge.style.backgroundColor = color;
-    badge.textContent = label;
-
+/** Returns "fast" | "medium" | "slow" | "unclassified" */
+function getCaseCategory(caseNum) {
     const avgMs = getCaseTrueAvgMs(caseNum);
-    badge.title = avgMs !== null
-        ? `${category.charAt(0).toUpperCase() + category.slice(1)} (avg: ${msToHumanReadable(avgMs * 10)})`
-        : "Unclassified";
+    if (avgMs === null) return "unclassified";
+    if (avgMs < SPEED_THRESHOLDS.fast)   return "fast";
+    if (avgMs < SPEED_THRESHOLDS.medium) return "medium";
+    return "slow";
 }
 
-/** Re-renders all badges — call after renderSelection() so tiles exist in the DOM */
-function updateAllBadges() {
-    const seen = {};
-    for (const r of window.timesArray) {
-        seen[r["case"]] = true;
+// ─── Speed group DOM management ───────────────────────────────────────────────
+
+/**
+ * Ensures a speed-category group container exists in #cases_selection.
+ * Mirrors the structure created by createGroup() in MySelection.js:
+ *   #groupContainer{name} > #groupBar{name} + #casesContainer{name}
+ */
+function ensureSpeedGroupExists(category) {
+    const groupName = SPEED_GROUP_NAMES[category];
+    if (_speedGroupsCreated.has(groupName)) return;
+
+    const casesSelection = document.getElementById("cases_selection");
+    if (!casesSelection) return;
+
+    // Group wrapper
+    const groupContainer = document.createElement("div");
+    groupContainer.className = "groupContainer";
+    groupContainer.id = "groupContainer" + groupName;
+
+    // Group bar — clicking it calls selectCaseGroup() just like normal groups
+    const groupBar = document.createElement("div");
+    groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
+    groupBar.id = "groupBar" + groupName;
+    groupBar.style.backgroundColor = SPEED_GROUP_COLORS[category];
+    groupBar.style.color = "white";
+    groupBar.style.borderColor = SPEED_GROUP_COLORS[category];
+    groupBar.onclick = () => selectCaseGroup(groupName);
+    groupBar.innerHTML = `<b>${groupName} (<span id="speedGroupCount_${category}">0</span> cases)</b>`;
+
+    // Cases row inside the group
+    const casesContainer = document.createElement("div");
+    casesContainer.id = "casesContainer" + groupName;
+    casesContainer.className = "rowFlex";
+    casesContainer.style.flexWrap = "wrap";
+
+    groupContainer.appendChild(groupBar);
+    groupContainer.appendChild(casesContainer);
+
+    // Insert speed groups at the top of cases_selection, in order: fast, medium, slow, unclassified
+    const order = ["fast", "medium", "slow", "unclassified"];
+    const myOrder = order.indexOf(category);
+
+    // Find the first existing speed group that should come after this one
+    let insertBefore = null;
+    for (let i = myOrder + 1; i < order.length; i++) {
+        const laterName = SPEED_GROUP_NAMES[order[i]];
+        const laterEl = document.getElementById("groupContainer" + laterName);
+        if (laterEl) { insertBefore = laterEl; break; }
     }
-    for (const caseNum of Object.keys(seen)) {
-        updateCaseBadge(parseInt(caseNum));
+
+    // Insert before that element, or at the top if none found
+    if (insertBefore) {
+        casesSelection.insertBefore(groupContainer, insertBefore);
+    } else {
+        casesSelection.insertBefore(groupContainer, casesSelection.firstChild);
     }
+
+    // Register in algsGroups so selectCaseGroup() can find the cases
+    if (typeof algsGroups !== "undefined") {
+        algsGroups[groupName] = algsGroups[groupName] || [];
+    }
+
+    _speedGroupsCreated.add(groupName);
 }
 
-// ─── Category Filter Bar ─────────────────────────────────────────────────────
+/** Updates the count shown in the speed group bar label */
+function updateSpeedGroupCount(category) {
+    const el = document.getElementById("speedGroupCount_" + category);
+    if (!el) return;
+    const groupName = SPEED_GROUP_NAMES[category];
+    const count = (algsGroups[groupName] || []).length;
+    el.textContent = count;
 
-/** Selects (or deselects if all already selected) cases matching a given category */
-function selectByCategory(category) {
-    const matchingCases = getAllValid().filter(c => getCaseCategory(c) === category);
-    if (matchingCases.length === 0) return;
+    // Also update the groupBar selected/unselected state to match selectCaseGroup expectations
+    const groupBar = document.getElementById("groupBar" + groupName);
+    if (!groupBar) return;
+    const cases = algsGroups[groupName] || [];
+    const allSel = cases.length > 0 && cases.every(c => selCases.includes(c));
+    groupBar.classList.toggle("itemSel", allSel);
+    groupBar.classList.toggle("itemUnsel", !allSel);
+}
 
-    const allAlreadySelected = matchingCases.every(c => selCases.includes(c));
+/**
+ * Moves a case tile into the correct speed group container.
+ * Removes it from its previous speed group's algsGroups entry first.
+ * Does nothing if the category hasn't changed since last move.
+ */
+function moveCaseToSpeedGroup(caseNum) {
+    const category = getCaseCategory(caseNum);
+    const groupName = SPEED_GROUP_NAMES[category];
 
-    for (const c of matchingCases) {
-        const j = selCases.indexOf(c);
-        if (allAlreadySelected && j !== -1) {
-            selCases.splice(j, 1);
-        } else if (!allAlreadySelected && j === -1) {
-            selCases.push(c);
+    // Nothing to do if already in the right group
+    if (_caseCategoryCache[caseNum] === category) return;
+    const prevCategory = _caseCategoryCache[caseNum];
+    _caseCategoryCache[caseNum] = category;
+
+    // Remove from previous speed group's algsGroups entry
+    if (prevCategory !== undefined) {
+        const prevGroupName = SPEED_GROUP_NAMES[prevCategory];
+        if (algsGroups[prevGroupName]) {
+            const idx = algsGroups[prevGroupName].indexOf(caseNum);
+            if (idx !== -1) algsGroups[prevGroupName].splice(idx, 1);
+        }
+        updateSpeedGroupCount(prevCategory);
+    }
+
+    // Ensure the destination group exists in the DOM
+    ensureSpeedGroupExists(category);
+
+    // Add to the new group's algsGroups entry
+    if (!algsGroups[groupName]) algsGroups[groupName] = [];
+    if (!algsGroups[groupName].includes(caseNum)) {
+        algsGroups[groupName].push(caseNum);
+    }
+
+    // Move the DOM tile element
+    const tile = document.getElementById("itemTd" + caseNum);
+    const destContainer = document.getElementById("casesContainer" + groupName);
+    if (tile && destContainer) {
+        // Unwrap from its colFlex wrapper if it has one (from makeDivNormal)
+        const wrapper = tile.parentElement;
+        destContainer.appendChild(tile);
+        if (wrapper && wrapper !== destContainer && wrapper.children.length === 0) {
+            wrapper.remove();
         }
     }
 
-    saveSelection();
+    // Update algsInformation so displayStats() shows the right group
+    if (typeof algsInformation !== "undefined" && algsInformation[caseNum]) {
+        algsInformation[caseNum].group = groupName;
+    }
 
-    // Update tile visual state
-    for (const c of matchingCases) {
-        const tile = document.getElementById("itemTd" + c);
-        if (tile) {
-            tile.className = (selCases.includes(c) ? "itemSel" : "itemUnsel") + " borderedContainer";
+    updateSpeedGroupCount(category);
+
+    // Remove the group container if it's now empty (except for unclassified which we keep)
+    if (prevCategory !== undefined && prevCategory !== "unclassified") {
+        const prevGroupName = SPEED_GROUP_NAMES[prevCategory];
+        const prevContainer = document.getElementById("groupContainer" + prevGroupName);
+        const prevCasesContainer = document.getElementById("casesContainer" + prevGroupName);
+        if (prevContainer && prevCasesContainer && prevCasesContainer.children.length === 0) {
+            prevContainer.remove();
+            _speedGroupsCreated.delete(prevGroupName);
         }
     }
-
-    updateAllBadges();
-    renderCategoryFilterBar();
 }
 
-/** Renders the category filter bar above the case grid */
-function renderCategoryFilterBar() {
-    const existing = document.getElementById("categoryFilterBar");
-    if (existing) existing.remove();
-
-    const bar = document.createElement("div");
-    bar.id = "categoryFilterBar";
-    bar.style.cssText = "display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;";
-
-    const categories = ["fast", "medium", "slow", "unclassified"];
-    for (const cat of categories) {
-        const { color } = SPEED_CATEGORY_STYLE[cat];
-        const matchingCases = getAllValid().filter(c => getCaseCategory(c) === cat);
-        if (matchingCases.length === 0) continue;
-
-        const allSelected = matchingCases.every(c => selCases.includes(c));
-        const label = cat.charAt(0).toUpperCase() + cat.slice(1);
-
-        const btn = document.createElement("button");
-        btn.textContent = `${label} (${matchingCases.length})`;
-        btn.style.cssText = `
-            background: ${cat === "unclassified" ? "#555" : color};
-            color: white;
-            border: 2px solid ${allSelected ? "white" : "transparent"};
-            border-radius: 6px;
-            padding: 4px 10px;
-            cursor: pointer;
-            font-weight: bold;
-            opacity: ${allSelected ? "1" : "0.75"};
-            transition: opacity 0.15s, border 0.15s;
-        `;
-        btn.title = `${allSelected ? "Deselect" : "Select"} all ${label} cases`;
-        btn.onclick = () => selectByCategory(cat);
-        bar.appendChild(btn);
+/** Re-evaluates every case that has at least one solve and moves it if needed */
+function recomputeAllCategories() {
+    const seen = new Set(window.timesArray.map(r => r["case"]));
+    for (const caseNum of seen) {
+        moveCaseToSpeedGroup(caseNum);
     }
-
-    const container = document.getElementById("cases_selection");
-    if (container) container.insertBefore(bar, container.firstChild);
 }
 
-// ─── Hook into existing code ─────────────────────────────────────────────────
+// ─── Hook into existing code ──────────────────────────────────────────────────
 
-// Store references to the originals before patching
-const _originalAppendStats = window.appendStats || appendStats;
-const _originalRenderSelection = window.renderSelection || renderSelection;
-
+// appendStats is defined in timer.js and called from timerStop()
+// We patch it after it's defined. Make sure categorisation.js loads after timer.js.
+const _cat_originalAppendStats = window.appendStats || appendStats;
 window.appendStats = function () {
-    _originalAppendStats();
-    updateCaseBadge(window.lastCase);
-    renderCategoryFilterBar();
+    _cat_originalAppendStats();
+    moveCaseToSpeedGroup(window.lastCase);
 };
 
+// Also recompute all categories whenever the selection grid is re-rendered,
+// so badges survive page navigation back to the select screen.
+// renderSelection is defined in selection.js.
+const _cat_originalRenderSelection = window.renderSelection || renderSelection;
 window.renderSelection = function () {
-    _originalRenderSelection();
-    updateAllBadges();
-    renderCategoryFilterBar();
+    _cat_originalRenderSelection();
+    recomputeAllCategories();
 };
