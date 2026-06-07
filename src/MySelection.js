@@ -144,7 +144,24 @@ function createGroup(preGroupName = null) {
         deleteGroup(customGroupName);
     };
     groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
-    groupBar.onclick = () => selectCaseGroup(customGroupName);
+    groupBar.onclick = () => {
+    const cases = algsGroups[groupName] || [];
+    const allSelected = cases.every(c => selCases.includes(c));
+    cases.forEach(c => {
+        const tile = document.getElementById("itemTd" + c);
+        const j = selCases.indexOf(c);
+        if (allSelected && j !== -1) {
+            selCases.splice(j, 1);
+            if (tile) tile.className = "itemUnsel borderedContainer";
+        } else if (!allSelected && j === -1) {
+            selCases.push(c);
+            if (tile) tile.className = "itemSel borderedContainer";
+        }
+    });
+    groupBar.classList.toggle("itemSel", !allSelected);
+    groupBar.classList.toggle("itemUnsel", allSelected);
+    saveSelection();
+};
 
     groupBar.id = "groupBar" + customGroupName;
     groupBar.innerText = customGroupName;
