@@ -20,8 +20,13 @@ const SPEED_GROUP_COLORS = {
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _speedGroupsCreated = new Set();
-const _caseCategoryCache = {};
+// Simple arrays of case IDs per category — no DOM groups needed
+const speedCategories = {
+    fast:         [],
+    medium:       [],
+    slow:         [],
+    unclassified: [],
+};
 
 function getCaseTrueAvgMs(caseNum) {
     const solves = window.timesArray.filter(r => r["case"] === caseNum);
@@ -37,131 +42,92 @@ function getCaseCategory(caseNum) {
     return "slow";
 }
 
-function ensureSpeedGroupExists(category) {
-    const groupName = SPEED_GROUP_NAMES[category];
-    if (_speedGroupsCreated.has(groupName)) return;
-
-    const casesSelection = document.getElementById("cases_selection");
-    if (!casesSelection) return;
-
-    const groupContainer = document.createElement("div");
-    groupContainer.className = "groupContainer";
-    groupContainer.id = "groupContainer" + groupName;
-
-    const groupBar = document.createElement("div");
-    groupBar.className = "borderedContainer itemUnsel pad groupNameDiv groupBar";
-    groupBar.id = "groupBar" + groupName;
-    groupBar.style.backgroundColor = SPEED_GROUP_COLORS[category];
-    groupBar.style.color = "white";
-    groupBar.style.borderColor = SPEED_GROUP_COLORS[category];
-    groupBar.innerHTML = `<b>${groupName} (<span id="speedGroupCount_${category}">0</span> cases)</b>`;
-
-    // Inline selection handler — avoids calling selectCaseGroup from selection.js
-    // which expects a different DOM structure
-    (function(gName, gBar) {
-        gBar.onclick = function() {
-            const cases = algsGroups[gName] || [];
-            const allSelected = cases.length > 0 && cases.every(c => selCases.includes(c));
-            cases.forEach(c => {
-                const tile = document.getElementById("itemTd" + c);
-                const j = selCases.indexOf(c);
-                if (allSelected && j !== -1) {
-                    selCases.splice(j, 1);
-                    if (tile) tile.className = "itemUnsel borderedContainer";
-                } else if (!allSelected && j === -1) {
-                    selCases.push(c);
-                    if (tile) tile.className = "itemSel borderedContainer";
-                }
-            });
-            gBar.classList.toggle("itemSel", !allSelected);
-            gBar.classList.toggle("itemUnsel", allSelected);
-            saveSelection();
-        };
-    })(groupName, groupBar);
-
-    const casesContainer = document.createElement("div");
-    casesContainer.id = "casesContainer" + groupName;
-    casesContainer.className = "rowFlex";
-    casesContainer.style.flexWrap = "wrap";
-
-    groupContainer.appendChild(groupBar);
-    groupContainer.appendChild(casesContainer);
-
-    // Insert in order: fast, medium, slow, unclassified — at top of cases_selection
-    const order = ["fast", "medium", "slow", "unclassified"];
-    const myOrder = order.indexOf(category);
-    let insertBefore = null;
-    for (let i = myOrder + 1; i < order.length; i++) {
-        const laterEl = document.getElementById("groupContainer" + SPEED_GROUP_NAMES[order[i]]);
-        if (laterEl) { insertBefore = laterEl; break; }
+function updateCaseCategory(caseNum) {
+    // Remove from whichever category it's currently in
+    for (const cat of Object.keys(speedCategories)) {
+        const idx = speedCategories[cat].indexOf(caseNum);
+        if (idx !== -1) speedCategories[cat].splice(idx, 1);
     }
-    if (insertBefore) {
-        casesSelection.insertBefore(groupContainer, insertBefore);
-    } else {
-        casesSelection.insertBefore(groupContainer, casesSelection.firstChild);
-    }
-
-    if (typeof algsGroups !== "undefined") {
-        algsGroups[groupName] = algsGroups[groupName] || [];
-    }
-
-    _speedGroupsCreated.add(groupName);
-}
-
-function updateSpeedGroupCount(category) {
-    const el = document.getElementById("speedGroupCount_" + category);
-    if (!el) return;
-    const groupName = SPEED_GROUP_NAMES[category];
-    el.textContent = (algsGroups[groupName] || []).length;
-}
-
-function moveCaseToSpeedGroup(caseNum) {
+    // Add to the correct one
     const category = getCaseCategory(caseNum);
-    const groupName = SPEED_GROUP_NAMES[category];
-
-    if (_caseCategoryCache[caseNum] === category) return;
-    const prevCategory = _caseCategoryCache[caseNum];
-    _caseCategoryCache[caseNum] = category;
-
-    // Remove from previous speed group
-    if (prevCategory !== undefined) {
-        const prevGroupName = SPEED_GROUP_NAMES[prevCategory];
-        if (algsGroups[prevGroupName]) {
-            const idx = algsGroups[prevGroupName].indexOf(caseNum);
-            if (idx !== -1) algsGroups[prevGroupName].splice(idx, 1);
-        }
-        updateSpeedGroupCount(prevCategory);
-    }
-
-    ensureSpeedGroupExists(category);
-
-    if (!algsGroups[groupName]) algsGroups[groupName] = [];
-    if (!algsGroups[groupName].includes(caseNum)) {
-        algsGroups[groupName].push(caseNum);
-    }
-
-    // Move the tile into the speed group container
-    const tile = document.getElementById("itemTd" + caseNum);
-    const destContainer = document.getElementById("casesContainer" + groupName);
-    if (tile && destContainer) {
-        const wrapper = tile.parentElement;
-        destContainer.appendChild(tile);
-        if (wrapper && wrapper !== destContainer && wrapper.children.length === 0) {
-            wrapper.remove();
-        }
-    }
-
-    if (typeof algsInformation !== "undefined" && algsInformation[caseNum]) {
-        algsInformation[caseNum].group = groupName;
-    }
-
-    updateSpeedGroupCount(category);
+    speedCategories[category].push(caseNum);
+    updateFilterBar();
 }
 
 function recomputeAllCategories() {
+    // Clear all
+    for (const cat of Object.keys(speedCategories)) {
+        speedCategories[cat] = [];
+    }
+    // Populate from timesArray
     const seen = new Set(window.timesArray.map(r => r["case"]));
     for (const caseNum of seen) {
-        moveCaseToSpeedGroup(caseNum);
+        const category = getCaseCategory(caseNum);
+        speedCategories[category].push(caseNum);
+    }
+    updateFilterBar();
+}
+
+// ─── Filter Bar ───────────────────────────────────────────────────────────────
+
+function selectSpeedCategory(category) {
+    const ids = speedCategories[category];
+    if (ids.length === 0) return;
+
+    // If all already selected, deselect them; otherwise select them
+    const allSelected = ids.every(c => selCases.includes(c));
+
+    for (const c of ids) {
+        const j = selCases.indexOf(c);
+        if (allSelected && j !== -1) {
+            selCases.splice(j, 1);
+        } else if (!allSelected && j === -1) {
+            selCases.push(c);
+        }
+        // Update tile appearance
+        const tile = document.getElementById("itemTd" + c);
+        if (tile) tile.className = (selCases.includes(c) ? "itemSel" : "itemUnsel") + " borderedContainer";
+    }
+    saveSelection();
+    updateFilterBar();
+}
+
+function updateFilterBar() {
+    const bar = document.getElementById("speedFilterBar");
+    if (!bar) return;
+
+    bar.innerHTML = "";
+    for (const cat of ["fast", "medium", "slow", "unclassified"]) {
+        const ids = speedCategories[cat];
+        if (ids.length === 0) continue;
+
+        const allSelected = ids.every(c => selCases.includes(c));
+        const btn = document.createElement("div");
+        btn.className = "borderedContainer pad " + (allSelected ? "itemSel" : "itemUnsel");
+        btn.style.backgroundColor = SPEED_GROUP_COLORS[cat];
+        btn.style.color = "white";
+        btn.style.cursor = "pointer";
+        btn.style.marginRight = "4px";
+        btn.style.marginBottom = "4px";
+        btn.innerHTML = `<b>${SPEED_GROUP_NAMES[cat]} (${ids.length})</b>`;
+        btn.onclick = () => selectSpeedCategory(cat);
+        bar.appendChild(btn);
+    }
+}
+
+function createFilterBar() {
+    if (document.getElementById("speedFilterBar")) return;
+
+    const bar = document.createElement("div");
+    bar.id = "speedFilterBar";
+    bar.className = "rowFlex";
+    bar.style.flexWrap = "wrap";
+    bar.style.marginBottom = "8px";
+
+    // Insert at the top of the selection area, above cases_selection
+    const casesSelection = document.getElementById("cases_selection");
+    if (casesSelection && casesSelection.parentNode) {
+        casesSelection.parentNode.insertBefore(bar, casesSelection);
     }
 }
 
@@ -170,11 +136,12 @@ function recomputeAllCategories() {
 const _cat_originalAppendStats = window.appendStats || appendStats;
 window.appendStats = function() {
     _cat_originalAppendStats();
-    moveCaseToSpeedGroup(window.lastCase);
+    updateCaseCategory(window.lastCase);
 };
 
 const _cat_originalCheckPostRender = window.checkPostRender || checkPostRender;
 window.checkPostRender = function() {
     _cat_originalCheckPostRender();
+    createFilterBar();
     recomputeAllCategories();
 };
