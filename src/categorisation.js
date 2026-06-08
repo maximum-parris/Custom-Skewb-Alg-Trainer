@@ -31,7 +31,7 @@ const speedCategories = {
 function getCaseTrueAvgMs(caseNum) {
     const solves = window.timesArray.filter(r => r["case"] === caseNum);
     if (solves.length === 0) return null;
-    return solves.reduce((sum, r) => sum + r["ms"], 0) / solves.length / 10;
+    return solves.reduce((sum, r) => sum + r["ms"], 0) / solves.length;
 }
 
 function getCaseCategory(caseNum) {
