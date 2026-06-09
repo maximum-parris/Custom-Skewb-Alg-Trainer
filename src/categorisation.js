@@ -28,10 +28,25 @@ const speedCategories = {
     unclassified: [],
 };
 
+const SPEED_RECENCY_WINDOW = 5;  // how many recent solves to consider
+const SPEED_RECENCY_WEIGHT = 2;  // how much more recent solves count vs older ones
+
 function getCaseTrueAvgMs(caseNum) {
     const solves = window.timesArray.filter(r => r["case"] === caseNum);
     if (solves.length === 0) return null;
-    return solves.reduce((sum, r) => sum + r["ms"], 0) / solves.length;
+
+    // Take only the most recent X solves
+    const recent = solves.slice(-SPEED_RECENCY_WINDOW);
+
+    // Weight them so the most recent counts most: [1, 1.5, 2, 2.5, 3] for window of 5
+    let weightedSum = 0;
+    let totalWeight = 0;
+    for (let i = 0; i < recent.length; i++) {
+        const weight = 1 + (SPEED_RECENCY_WEIGHT - 1) * (i / (recent.length - 1 || 1));
+        weightedSum += recent[i]["ms"] * weight;
+        totalWeight += weight;
+    }
+    return weightedSum / totalWeight;
 }
 
 function getCaseCategory(caseNum) {
